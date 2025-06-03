@@ -1,0 +1,84 @@
+[package]
+name = "exodb"
+version = "0.1.0"
+edition = "2024"
+categories = ["database-implementations"]
+description = "Exoskeletion database implementation for redb"
+documentation = "https://docs.rs/exodb"
+keywords = ["search", "autocomplete", "struct", "vec", "hashmap"]
+license = "MIT OR Apache-2.0"
+publish = true
+readme = "README.md"
+repository = "https://github.com/leontoeides/exodb"
+
+[features]
+# Default setup with safety checks enabled
+default = ["serde-safety", "index-safety", "musli-storage", "ahash-key-set", "anyhow"]
+
+# Disables compile-time serde safety checks for advanced users
+i-know-what-im-doing = ["rmp-serde", "ahash-key-set", "anyhow"]
+
+# Enables strict codec safety enforcement
+serde-safety = []
+
+# Prevents users from mutating tables directly without updating indexes. This feature disables
+# access to `TableMut` and low-level table mutation to ensure that all writes pass through safe,
+# index-aware methods:
+index-safety = []
+
+# CODECS
+#
+# Select the serializer/deserializer for retrieving and storing data. Select one of the following in
+# your project's `features`:
+bincode-native = ["dep:bincode"]
+bincode-serde = ["dep:bincode", "bincode/serde", "dep:serde"]
+bitcode-native = ["dep:bitcode"]
+bitcode-serde = ["dep:bitcode", "bitcode/serde", "dep:serde"]
+borsh = ["dep:borsh"]
+musli-descriptive = ["dep:musli", "musli/descriptive"]
+musli-storage = ["dep:musli", "musli/storage"]
+musli-wire = ["dep:musli", "musli/wire"]
+postcard-serde = ["dep:postcard", "postcard/use-std", "dep:serde"]
+rkyv = [] # rkyv is a mandatory dependency for zero-copy key-sets
+rmp-serde = ["dep:rmp-serde", "dep:serde"] # Great serde compatibility, size, and performance.
+zerocopy = ["dep:zerocopy"]
+serde = ["dep:serde"]
+
+# KEY-SETS
+#
+# Selects the key-set implementation. Select one of the following in your project's `features`:
+ahash-key-set = ["dep:ahash"] # ahash-backed index sets, great all-round choice
+hash-key-set = []	# HashSet-backed index sets
+b-tree-key-set = []	# BTreeSet-backed index sets
+vec-key-set = [] 	# Vec-backed index sets, for small primary keys & high-cardinality indicies
+
+# This feature enables `serde_flow` versioning and compatibility framework integrations:
+serde-flow = ["dep:serde_flow"]
+
+[dependencies]
+# Required dependencies
+redb = "2.6"
+thiserror = "2.0"
+rkyv = "0.8"
+
+# Serializer & deserializer features
+bincode = { version = "2.0", optional = true }
+bitcode = { version = "0.6", optional = true }
+borsh = { version = "1.5", optional = true }
+musli = { version = "0.0", optional = true }
+postcard = { version = "1.1", optional = true }
+rmp-serde = { version = "1.3", optional = true }
+zerocopy = { version = "0.8", optional = true }
+
+serde = { version = "1.0", features = ["derive"], optional = true }
+
+# Key-set features
+ahash = { version = "0.8", optional = true }
+
+# Integrations
+anyhow = { version = "1.0", optional = true }
+serde_flow = { version = "1.1", optional = true }
+
+# Development
+chrono = { version = "0.4", features = ["serde"] }
+pin-project = "1.1"
