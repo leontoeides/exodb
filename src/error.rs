@@ -50,7 +50,7 @@ pub enum Error {
     /// [redb](https://www.redb.org/)
     /// [transaction error](https://docs.rs/redb/latest/redb/enum.TransactionError.html).
     #[error(transparent)]
-    RedbTransaction(#[from] redb::TransactionError),
+    RedbTransaction(#[from] Box<redb::TransactionError>),
 
     /// [rkyv](https://crates.io/crates/rkyv) rancor error.
     #[error(transparent)]
@@ -133,11 +133,11 @@ impl Error {
         let boxed: Box<dyn std::error::Error + Send + Sync + 'static> = match self {
             Self::External(inner) => {
                 let msg = format!("{ctx}: {inner}");
-                Box::new(std::io::Error::new(std::io::ErrorKind::Other, msg))
+                Box::new(std::io::Error::other(msg))
             },
             err => {
                 let msg = format!("{ctx}: {err}");
-                Box::new(std::io::Error::new(std::io::ErrorKind::Other, msg))
+                Box::new(std::io::Error::other(msg))
             },
         };
 

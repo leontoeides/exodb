@@ -13,7 +13,7 @@ repository = "https://github.com/leontoeides/exodb"
 
 [features]
 # Default setup with safety checks enabled
-default = ["serde-safety", "index-safety", "musli-storage", "ahash-key-set", "anyhow"]
+default = ["serde-safety", "index-safety", "rmp-serde", "ahash-key-set", "anyhow"]
 
 # Disables compile-time serde safety checks for advanced users
 i-know-what-im-doing = ["rmp-serde", "ahash-key-set", "anyhow"]

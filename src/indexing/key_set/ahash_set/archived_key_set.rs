@@ -59,7 +59,6 @@ impl ReadableKeySet for ArchivedKeySet {
     ///
     /// For example, `"Tide Pools"` might return `3` if there are three known creatures found there.
     #[inline]
-    #[must_use]
     fn len(&self) -> usize {
         self.0.len()
     }
@@ -69,7 +68,6 @@ impl ReadableKeySet for ArchivedKeySet {
     /// For example, `"ISO Class 1 Cleanroom"` might return `true` because no creatures live in the
     /// habitat.
     #[inline]
-    #[must_use]
     fn is_empty(&self) -> bool {
         self.len() == 0
     }
@@ -86,7 +84,6 @@ impl ReadableKeySet for ArchivedKeySet {
     ///
     /// * The primary key must be in serialized form (as raw bytes).
     #[inline]
-    #[must_use]
     fn contains(&self, primary_key_bytes: &[u8]) -> bool {
         self.0.contains(primary_key_bytes)
     }
@@ -95,7 +92,6 @@ impl ReadableKeySet for ArchivedKeySet {
     ///
     /// “Are all elements in `self` also in `other`?”
     #[inline]
-    #[must_use]
     fn is_subset(&self, other: &Self) -> bool {
         self.0.iter().all(|member| other.contains(member))
     }
@@ -104,7 +100,6 @@ impl ReadableKeySet for ArchivedKeySet {
     ///
     /// “Are all elements in `other` also in `self`?”
     #[inline]
-    #[must_use]
     fn is_superset(&self, other: &Self) -> bool {
         other.0.iter().all(|member| self.contains(member))
     }
@@ -113,7 +108,6 @@ impl ReadableKeySet for ArchivedKeySet {
     ///
     /// “Do these sets share any elements?”
     #[inline]
-    #[must_use]
     fn intersects(&self, other: &Self) -> bool {
         self.0.iter().any(|member| other.contains(member))
     }
