@@ -41,6 +41,7 @@ pub type RawTable<'txn> = redb::Table<'txn, &'static [u8], &'static [u8]>;
 /// | `Io`            | I/O failure (disk error, permission issue, etc.)  | Check file permissions and storage    |
 /// | `PreviousIo`    | Prior I/O failure poisoned the database           | Reopen or recover the environment     |
 /// | `LockPoisoned`  | A panic occurred while holding a database lock    | Restart process or retry operation    |
+#[derive(Debug)]
 pub struct TableMut<'txn, K, V>
 where
     K: Codec<K>,
@@ -66,7 +67,14 @@ where
     /// structured data using [`Codec`] implementations for the key and value types.
     ///
     /// Internally, this wraps the raw `redb` table into a type-safe exoskeleton.
-    #[must_use] pub fn new(table: RawTable<'txn>) -> Self {
+    ///
+    /// # Notes
+    ///
+    /// * This method call is passed-through to the `redb` Rust embedded database.
+    #[cfg(feature = "redb-pass-through")]
+    #[inline]
+    #[must_use]
+    pub fn new(table: RawTable<'txn>) -> Self {
         table.into()
     }
 
@@ -89,6 +97,12 @@ where
     ///
     /// * Decoding any key or value fails, or
     /// * If a storage-level error occurs.
+    ///
+    /// # Notes
+    ///
+    /// * This method call is passed-through to the `redb` Rust embedded database.
+    #[cfg(feature = "redb-pass-through")]
+    #[inline]
     #[allow(clippy::type_complexity, reason="required for lifetime bounds")]
     pub fn extract_if<F>(
         &mut self,
@@ -99,7 +113,7 @@ where
     {
         let closure: Box<dyn for<'a, 'b> FnMut(&'a [u8], &'b [u8]) -> bool> = Box::new(
             move |k: &[u8], v: &[u8]| -> bool {
-                match (K::decode(k), V::decode(v)) {
+                match (K::deserialize(k), V::deserialize(v)) {
                     (Ok(k_dec), Ok(v_dec)) => predicate(&k_dec, &v_dec),
                     _ => false,
                 }
@@ -127,6 +141,12 @@ where
     ///
     /// * Decoding any key or value fails, or
     /// * If a storage-level error occurs.
+    ///
+    /// # Notes
+    ///
+    /// * This method call is passed-through to the `redb` Rust embedded database.
+    #[cfg(feature = "redb-pass-through")]
+    #[inline]
     #[allow(clippy::type_complexity, reason="required for lifetime bounds")]
     pub fn retain<F>(
         &mut self,
@@ -137,7 +157,7 @@ where
     {
         let closure: Box<dyn for<'a, 'b> FnMut(&'a [u8], &'b [u8]) -> bool> = Box::new(
             move |k: &[u8], v: &[u8]| -> bool {
-                match (K::decode(k), V::decode(v)) {
+                match (K::deserialize(k), V::deserialize(v)) {
                     (Ok(k_dec), Ok(v_dec)) => predicate(&k_dec, &v_dec),
                     _ => false,
                 }
@@ -161,13 +181,13 @@ where
     /// * Decoding the previous value fails (if any), or
     /// * Insertion fails due to storage-related issues.
     pub fn insert(&mut self, key: &K, value: &V) -> Result<Option<V>, Error> {
-        let key_bytes = K::encode(key)?;
-        let value_bytes = V::encode(value)?;
+        let key_bytes = K::serialize(key)?;
+        let value_bytes = V::serialize(value)?;
         if let Some(value) = self.redb_table.insert(
             key_bytes.as_slice(),
             value_bytes.as_slice()
         )? {
-            Ok(Some(V::decode(value.value())?))
+            Ok(Some(V::deserialize(value.value())?))
         } else {
             Ok(None)
         }
@@ -223,8 +243,8 @@ where
         entries: impl IntoIterator<Item = (K, V)>
     ) -> Result<(), Error> {
         for (key, value) in entries {
-            let key_bytes = K::encode(&key)?;
-            let value_bytes = V::encode(&value)?;
+            let key_bytes = K::serialize(&key)?;
+            let value_bytes = V::serialize(&value)?;
             // We discard previous value for performance; user can call `insert` manually if needed
             let _ = self.redb_table.insert(key_bytes.as_slice(), value_bytes.as_slice())?;
         }
@@ -264,7 +284,7 @@ where
         for value in entries {
             let primary_key = value.primary_key();
             let key_bytes = primary_key.to_bytes()?;
-            let value_bytes = V::encode(value)?;
+            let value_bytes = V::serialize(value)?;
             // We discard previous value for performance; user can call `insert` manually if needed
             let _ = self.redb_table.insert(key_bytes.as_slice(), value_bytes.as_slice())?;
         }
@@ -283,9 +303,9 @@ where
     /// * Decoding the removed value fails (if any), or
     /// * Removal fails due to storage-related issues.
     pub fn remove(&mut self, key: &K) -> Result<Option<V>, Error> {
-        let key_bytes = K::encode(key)?;
+        let key_bytes = K::serialize(key)?;
         if let Some(value) = self.redb_table.remove(key_bytes.as_slice())? {
-            Ok(Some(V::decode(value.value())?))
+            Ok(Some(V::deserialize(value.value())?))
         } else {
             Ok(None)
         }
@@ -321,9 +341,9 @@ where
     /// * Decoding the value fails (if any), or
     /// * A storage error occurs.
     pub fn get(&self, key: &K) -> Result<Option<V>, Error> {
-        let key_bytes = K::encode(key)?;
+        let key_bytes = K::serialize(key)?;
         if let Some(value) = self.redb_table.get(key_bytes.as_slice())? {
-            Ok(Some(V::decode(value.value())?))
+            Ok(Some(V::deserialize(value.value())?))
         } else {
             Ok(None)
         }
@@ -334,6 +354,12 @@ where
     /// # Errors
     ///
     /// * Returns an error if the underlying storage fails to produce stats.
+    ///
+    /// # Notes
+    ///
+    /// * This method call is passed-through to the `redb` Rust embedded database.
+    #[cfg(feature = "redb-pass-through")]
+    #[inline]
     pub fn stats(&self) -> Result<redb::TableStats, Error> {
         Ok(self.redb_table.stats()?)
     }
@@ -343,6 +369,12 @@ where
     /// # Errors
     ///
     /// * Returns an error if the operation fails due to storage issues.
+    ///
+    /// # Notes
+    ///
+    /// * This method call is passed-through to the `redb` Rust embedded database.
+    #[cfg(feature = "redb-pass-through")]
+    #[inline]
     pub fn len(&self) -> Result<u64, Error> {
         Ok(self.redb_table.len()?)
     }
@@ -352,12 +384,25 @@ where
     /// # Errors
     ///
     /// * Returns an error if the operation fails due to storage issues.
+    ///
+    /// # Notes
+    ///
+    /// * This method call is passed-through to the `redb` Rust embedded database.
+    #[cfg(feature = "redb-pass-through")]
+    #[inline]
     pub fn is_empty(&self) -> Result<bool, Error> {
         Ok(self.redb_table.is_empty()?)
     }
 
     /// Returns the name of the underlying table.
-    #[must_use] pub fn name(&self) -> &str {
+    ///
+    /// # Notes
+    ///
+    /// * This method call is passed-through to the `redb` Rust embedded database.
+    #[cfg(feature = "redb-pass-through")]
+    #[inline]
+    #[must_use]
+    pub fn name(&self) -> &str {
         self.redb_table.name()
     }
 }

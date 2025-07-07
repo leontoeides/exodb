@@ -1,67 +1,152 @@
 [package]
-name = "exodb"
+name = "atlatl"
 version = "0.1.0"
 edition = "2024"
 categories = ["database-implementations"]
-description = "Exoskeletion database implementation for redb"
-documentation = "https://docs.rs/exodb"
+description = "Atlatl is a performance-conscious wrapper for redb with ergonomic access to typed records, multiple serializers, index support, and range queries. Built for precision, clarity, and speed."
+documentation = "https://docs.rs/atlatl"
 keywords = ["search", "autocomplete", "struct", "vec", "hashmap"]
 license = "MIT OR Apache-2.0"
 publish = true
 readme = "README.md"
-repository = "https://github.com/leontoeides/exodb"
+repository = "https://github.com/leontoeides/atlatl"
 
 [features]
 # Default setup with safety checks enabled
-default = ["serde-safety", "index-safety", "rmp-serde", "ahash-key-set", "anyhow"]
+default = [
+	"serde-safety", 				# Enables strict serializer safety enforcement.
+	"index-safety", 				# Prevents users from mutating tables directly.
 
-# Disables compile-time serde safety checks for advanced users
-i-know-what-im-doing = ["rmp-serde", "ahash-key-set", "anyhow"]
+	"serializer-rmp-serde",			# Selects MessagePack for serialization.
+	"compress-lz4",					# Selects LZ4 for compression.
+	"ecc-reed-solomon",				# Selects Reed-Solomon for ECC error correction.
+	"encrypt-aes-gcm",				# Selects ChaCha20Poly1305 for encryption.
+	"key-set-ahash",				# Selects AHash as the key-set implementor.
 
-# Enables strict codec safety enforcement
-serde-safety = []
+	"missing-not-return-empty", 	# Return an empty set when an unary NOT index returns nothing.
+	"anyhow",						# Atlatl's main error type can be extended with `anyhow`
+	"serde"							# Adds serde support for types wherever possible.
+]
+
+# SERIALIZERS
+#
+# If you want to enable support for data serialization, enable one of the following features in your
+# project's Cargo.toml:
+serializer-bincode-native = ["serializers", "dep:bincode"]
+serializer-bincode-serde = ["serializers", "dep:bincode", "bincode/serde", "dep:serde"]
+serializer-bitcode-native = ["serializers", "dep:bitcode"]
+serializer-bitcode-serde = ["serializers", "dep:bitcode", "bitcode/serde", "dep:serde"]
+serializer-borsh = ["serializers", "dep:borsh"]
+serializer-musli-descriptive = ["serializers", "dep:musli", "musli/descriptive"]
+serializer-musli-storage = ["serializers", "dep:musli", "musli/storage"]
+serializer-musli-wire = ["serializers", "dep:musli", "musli/wire"]
+serializer-postcard-serde = ["serializers", "dep:postcard", "postcard/use-std", "dep:serde"]
+serializer-rkyv = [] # rkyv is a mandatory dependency for zero-copy key-sets
+serializer-rmp-serde = ["serializers", "dep:rmp-serde", "dep:serde"] # Great serde compatibility.
+serializer-zerocopy = ["serializers", "dep:zerocopy"]
+
+# COMPRESSORS
+#
+# Notes:
+# * Compression is primarily intended for larger data such as images, full documents, etc.
+# * This feature has a significant performance penalty.
+#
+# If you want to enable support for data compression, add one of the following features to your
+# project's Cargo.toml:
+compress-brotli = ["compressors", "dep:brotli"] # Archival & read-heavy workloads
+compress-bzip2 = ["compressors", "dep:bzip2", "bzip2/default"] #  Legacy or max-ratio scenarios
+compress-deflate = ["compressors", "dep:flate2", "flate2/rust_backend"] # General purpose, balanced
+compress-gzip = ["compressors", "dep:flate2", "flate2/rust_backend"] # General purpose, balanced
+compress-lz4 = ["compressors", "dep:lz4_flex"] # High-speed, low-latency workloads
+compress-zlib = ["compressors", "dep:flate2", "flate2/rust_backend"] # General purpose, balanced
+compress-zstd = ["compressors", "dep:zstd"] # Archival & read-heavy workloads
+
+# ENCRYPTORS
+#
+# Notes:
+# * This feature has a significant performance penalty.
+#
+# If you want to enable support for encryption, add one of the following features to your project's
+# Cargo.toml:
+encrypt-aes-gcm = ["encryptors", "dep:aes-gcm", "aes-gcm/std", "dep:generic-array"]
+encrypt-chacha20 = ["encryptors", "dep:chacha20poly1305", "chacha20poly1305/std"]
+
+# CORRECTORS
+#
+# Notes:
+# * Error correction is primarily intended for larger data such as images, full documents, etc.
+# * It can be used for smaller data types but with a significant performance and size penalties.
+# * This feature has a significant performance penalty.
+#
+# If you want to enable support for data correction, add one of the following features to your
+# project's Cargo.toml:
+ecc-reed-solomon = ["correctors", "dep:reed-solomon-erasure", "dep:crc32fast"]
+
+# Enables strict serializer safety enforcement.
+serde-safety = ["dep:serde"]
+
+# Adds serde support for types wherever possible.
+serde = ["dep:serde"]
+
+# Exposes additional methods that give access the underlying `redb` Rust embedded database.
+redb-pass-through = []
 
 # Prevents users from mutating tables directly without updating indexes. This feature disables
 # access to `TableMut` and low-level table mutation to ensure that all writes pass through safe,
-# index-aware methods:
+# index-aware methods.
 index-safety = []
 
-# CODECS
-#
-# Select the serializer/deserializer for retrieving and storing data. Select one of the following in
-# your project's `features`:
-bincode-native = ["dep:bincode"]
-bincode-serde = ["dep:bincode", "bincode/serde", "dep:serde"]
-bitcode-native = ["dep:bitcode"]
-bitcode-serde = ["dep:bitcode", "bitcode/serde", "dep:serde"]
-borsh = ["dep:borsh"]
-musli-descriptive = ["dep:musli", "musli/descriptive"]
-musli-storage = ["dep:musli", "musli/storage"]
-musli-wire = ["dep:musli", "musli/wire"]
-postcard-serde = ["dep:postcard", "postcard/use-std", "dep:serde"]
-rkyv = [] # rkyv is a mandatory dependency for zero-copy key-sets
-rmp-serde = ["dep:rmp-serde", "dep:serde"] # Great serde compatibility, size, and performance.
-zerocopy = ["dep:zerocopy"]
-serde = ["dep:serde"]
+# Enables the ability to put custom function predicates into a `Query`.
+custom-queries = []
 
 # KEY-SETS
 #
 # Selects the key-set implementation. Select one of the following in your project's `features`:
-ahash-key-set = ["dep:ahash"] # ahash-backed index sets, great all-round choice
-hash-key-set = []	# HashSet-backed index sets
-b-tree-key-set = []	# BTreeSet-backed index sets
-vec-key-set = [] 	# Vec-backed index sets, for small primary keys & high-cardinality indicies
+key-set-ahash = ["dep:ahash"] # AHash-backed index sets, great all-round choice
+key-set-hash = []	# HashSet-backed index sets
+key-set-btree = []	# BTreeSet-backed index sets
+key-set-vec = [] 	# Vec-backed index sets, for small primary keys & high-cardinality indicies
+
+# NOT MISSING BEHAVIOUR
+#
+# When performing a `NOT` query (exclude records from a given index key), there are 3 possible
+# outcomes when the exclusion key does not exist in the index:
+#
+# * `missing-not-return-empty` · Returns an empty set, no records
+# * `missing-not-return-all` · Returns all records in the database
+# * `missing-not-return-error` · Returns an error
+missing-not-return-empty = [] # Recommended in production to avoid accidental overmatching
+missing-not-return-all = [] # Recommended during development if you're doing exploratory queries
+missing-not-return-error = [] # Recommended when running critical queries where exclusion failures error
 
 # This feature enables `serde_flow` versioning and compatibility framework integrations:
 serde-flow = ["dep:serde_flow"]
+
+# Enables serialization. Don't enable this directly. Select a serializer feature from the above
+# "SERIALIZERS" list.
+serializers = []
+
+# Enables compression. Don't enable this directly. Select a compressor feature from the above
+# "COMPRESSORS" list.
+compressors = []
+
+# Enables encryption. Don't enable this directly. Select an encryptor feature from the above
+# "ENCRYPTORS" list.
+encryptors = []
+
+# Enables ECC error correction coding. Don't enable this directly. Select a corrector feature from
+# the above "CORRECTORS" list.
+correctors = []
 
 [dependencies]
 # Required dependencies
 redb = "2.6"
 thiserror = "2.0"
 rkyv = "0.8"
+tinyvec = { version = "1.9", features = ["alloc"] }
+tracing = "0.1"
 
-# Serializer & deserializer features
+# Serializer features
 bincode = { version = "2.0", optional = true }
 bitcode = { version = "0.6", optional = true }
 borsh = { version = "1.5", optional = true }
@@ -71,6 +156,22 @@ rmp-serde = { version = "1.3", optional = true }
 zerocopy = { version = "0.8", optional = true }
 
 serde = { version = "1.0", features = ["derive"], optional = true }
+
+# Compressor features
+brotli = { version = "8.0", optional = true }
+bzip2 = { version = "0.6", optional = true }
+flate2 = { version = "1.1", default-features = false, optional = true }
+lz4_flex = { version = "0.11", optional = true }
+zstd = { version = "0.13", optional = true }
+
+# Encryptor features
+aes-gcm = { version = "0.10", optional = true }
+chacha20poly1305 = { version = "0.10", optional = true }
+generic-array = { version = "1.2", optional = true }
+
+# Corrector features
+reed-solomon-erasure = { version = "6.0", optional = true }
+crc32fast = { version = "1.4", optional = true }
 
 # Key-set features
 ahash = { version = "0.8", optional = true }

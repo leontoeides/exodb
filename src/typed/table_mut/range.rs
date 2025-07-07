@@ -35,8 +35,8 @@ where
         self.inner.next().map(|entry| entry
             .map_err(Into::into)
             .and_then(|(k_guard, v_guard)| {
-                let key   = K::decode(k_guard.value())?;
-                let value = V::decode(v_guard.value())?;
+                let key   = K::deserialize(k_guard.value())?;
+                let value = V::deserialize(v_guard.value())?;
                 Ok((key, value))
             })
         )
@@ -58,8 +58,8 @@ where
         self.inner.next().map(|entry| entry
             .map_err(Into::into)
             .and_then(|(k_guard, v_guard)| {
-                let key   = K::decode(k_guard.value())?;
-                let value = V::decode(v_guard.value())?;
+                let key   = K::deserialize(k_guard.value())?;
+                let value = V::deserialize(v_guard.value())?;
                 Ok((key, value))
             })
         )

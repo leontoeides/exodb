@@ -18,7 +18,7 @@ impl ArchivedKeySet {
     /// # Notes
     ///
     /// * The primary keys will be returned in serialized form, as raw bytes. If needed, each key
-    ///   can be deserialized into its full form by using `K::decode(item)`
+    ///   can be deserialized into its full form by using `K::deserialize(item)`
     ///
     /// * Primary keys are used to get actual records from the database.
     #[inline]
@@ -50,7 +50,7 @@ impl ArchivedKeySet {
 //
 // Readable Key-Set Implementation
 
-impl ReadableKeySet for ArchivedKeySet {
+impl ReadableKeySet for &ArchivedKeySet {
     // +----------------------+
     // | Basic Set Operations |
     // +----------------------+
@@ -144,7 +144,7 @@ impl<'i> IntoIterator for &'i ArchivedKeySet {
     /// # Notes
     ///
     /// * The primary keys will be returned in serialized form, as raw bytes. If needed, each key
-    ///   can be deserialized into its full form by using `K::decode(item)`
+    ///   can be deserialized into its full form by using `K::deserialize(item)`
     ///
     /// * Primary keys are used to get actual records from the database.
     fn into_iter(self) -> Self::IntoIter {
@@ -156,7 +156,7 @@ impl<'i> IntoIterator for &'i ArchivedKeySet {
 //
 // Upgradable Key-Set Implementation
 
-impl crate::indexing::key_set::UpgradableKeySet for ArchivedKeySet {
+impl crate::indexing::key_set::UpgradableKeySet for &ArchivedKeySet {
     /// Upgrades the [`ArchivedKeySet`] into an owned & mutable [`KeySet`] by completing the
     /// `rkyv` deserialization process, if necessary.
     ///
@@ -168,7 +168,7 @@ impl crate::indexing::key_set::UpgradableKeySet for ArchivedKeySet {
     ///   fails.
     #[inline]
     fn upgrade(self) -> Result<KeySet, crate::Error> {
-        let deserialized = rkyv::deserialize::<KeySet, rkyv::rancor::Error>(&self)?;
+        let deserialized = rkyv::deserialize::<KeySet, rkyv::rancor::Error>(self)?;
         Ok(deserialized)
     }
 }

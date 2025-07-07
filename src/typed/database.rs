@@ -30,7 +30,7 @@ use crate::typed::transaction::WriteTransaction;
 /// This type wraps a `redb::Database` and provides ergonomic access to typed tables,
 /// leveraging the `Codec` trait for automatic encoding and decoding.
 ///
-/// For ordered operations, use tables with key types that also implement [`OrderedWhenEncoded`].
+/// For ordered operations, use tables with key types that also implement [`OrderedWhenSerialized`].
 pub struct Database(redb::Database);
 
 impl Database {
@@ -42,11 +42,11 @@ impl Database {
 
     /// Begins a read-only transaction.
     pub fn read(&self) -> Result<ReadTransaction, Error> {
-        Ok(ReadTransaction::new(self.0.begin_read()?))
+        Ok(ReadTransaction::new(self.0.begin_read().map_err(Box::new)?))
     }
 
     /// Begins a writable transaction.
     pub fn write(&self) -> Result<WriteTransaction, Error> {
-        Ok(WriteTransaction::new(self.0.begin_write()?))
+        Ok(WriteTransaction::new(self.0.begin_write().map_err(Box::new)?))
     }
 }

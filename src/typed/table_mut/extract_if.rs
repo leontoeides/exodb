@@ -2,7 +2,7 @@
 //! values returns `true`.
 
 use std::marker::PhantomData;
-use crate::codecs::Codec;
+use crate::layers::serializers::Codec;
 
 // -------------------------------------------------------------------------------------------------
 
@@ -53,8 +53,8 @@ where
             .map(|entry| entry
                 .map_err(Into::into)
                 .and_then(|(k, v)| Ok((
-                    K::decode(k.value())?,
-                    V::decode(v.value())?,
+                    K::deserialize(k.value())?,
+                    V::deserialize(v.value())?,
                 )))
             )
     }

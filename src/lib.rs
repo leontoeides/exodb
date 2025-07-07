@@ -1,3 +1,33 @@
+   /*
+                                          ░░
+                                        ░░▓▓░░
+                                  ░▒▓██▓▓▒▒▒▒▓▓██▓▒░
+                               ░▒█▓▒▒▒▒▒▓▒░█▒▓▒▒▒▒▒▓█▒░
+                             ░▓▓▒▒▒▓▒▓▒▓▓▒░█▒▓▓▓▓▓▒▒▓▒▓▓▒
+                           ░██▒▓▒▒▒▓█▓▒░░▒▒▒▓░░▒▓█▓▒▒▒▒▒▓█░
+                          ▒█▒▒▓▓▓▓▓░     ▒▓█▒     ░▓▓▓▓▒▒▒█▒
+                         ▒█▒▓▒▓▓▓░      ▒▓▓█▓▒      ░▓▓▒▒▓▒█▒
+                        ░█▒▓▒▓▓▒       ▒█▓▓█▓█▒       ▒█▓▓▒▒█░
+                       ░▓▓▒▒▓▓▒       ▒▓▓▓▓▓▓▓▓▒       ▒▓▓▒▒▓█░
+                       ░█▒▒▓▒█░      ▒▓█▓█▓██▓█▓▒      ░█▒▓▒▒█▒
+                       ▒▓▒▒▒▓▒      ░▓██▓▒▒█▒▓██▓░      ▒▓▒▓▒▓▒
+                       ▒▓▒▒▒█▒     ░█▓██▓▓▒█▓▓███▓░     ▒█▒▓▒▓▒
+                       ▒▓▒▒▓▓▓    ░▓▓█▓█▒▒▒█▒▒█▓█▓▓░    ▓▓▓▒▒▓▒
+                       ░█▒▒▓▒█░  ░▓██▓▒  ░▒█░  ▒▓██▓░  ░█▒▒▒▒█░
+                        ▓█▒▒▒▓▓░░▓▒▓▒░   ░▒█░   ░▒▓▒▓░░▓▓▓▒▒▓▓
+                         █▓▒▒▒▓▓▓▒▓░     ░▒█░     ░▓▒▒▓▓▓▒▓▓█
+                         ░▓▓▒▒▒▒█▒░      ░▒█░      ░▒█▓▒▒▒▓▓░
+                          ░▓▓▒▒▒▓▓▓▓░    ░▒█░    ░▓▓▓▓▒▒▒▓▓░
+                            ░█▓▒▓▒▓▓▒██▓▒▒▒█▒▒▓██▒▓▓▒▓▒▓█░
+                             ░▒▓▓▓▒▒▒▒▓▒▒▒▒█▓▒▒▓▒▒▒▒▓▓▓▒░
+                                ░▒▓█▓▒▒▒▒▒▒█▒▒▒▒▒▓██▒░
+                                    ░▒▓███▓████▓▒░
+                                          ▒▓░
+                                          ░▒
+
+                                      A T L A T L
+*/
+
 #![warn(
    clippy::all,
    clippy::cargo,
@@ -6,25 +36,27 @@
    clippy::style,
 )]
 
-pub mod codecs;
-pub use crate::codecs::Codec;
+// #[cfg(debug_assertions)]
+// debug_assert_eq!(cfg!(target_endian = "little"), true, "Atlatl only supports little-endian targets.");
 
-mod error;
-pub use crate::error::Error;
+#[cfg(any(
+   feature = "serializers",
+   feature = "compressors",
+   feature = "correctors",
+   feature = "encryptors",
+))]
+pub mod layers;
 
-pub mod indexing;
+// #[cfg(feature = "redb-pass-through")]
+// pub mod redb;
 
-// pub mod store;
-//pub mod typed;
+// mod error;
+// pub use crate::error::Error;
+
 // pub mod indexing;
+// pub mod querying;
 
-// pub use codec::*;
-// pub use store::*;
-// pub use index::*;
+// mod data_buf;
+// pub use crate::data_buf::ValueBuf;
 
-// #[cfg(feature = "indicium")]
-// pub mod indicium_support;
-
-// Optional future extension for auto-complete + fuzzy search
-// #[cfg(feature = "indicium")]
-// pub use indicium_support::*;
+// pub mod typed;

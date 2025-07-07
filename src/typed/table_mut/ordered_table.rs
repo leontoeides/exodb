@@ -1,16 +1,16 @@
 //! Enables additional operations on `TableMut` when the key type `K` implements
-//! `OrderedWhenEncoded`.
+//! `OrderedWhenSerialized`.
 
-use crate::codecs::OrderedWhenEncoded;
+use crate::layers::serializers::OrderedWhenSerialized;
 use crate::typed::{ResultEntry, table_mut::{ExtractIf, Range, TableMut}};
 use crate::{Codec, Error};
 use redb::ReadableTable;
 
 // -------------------------------------------------------------------------------------------------
 //
-/// Enables ordered operations on [`TableMut`] when the key type implements [`OrderedWhenEncoded`].
+/// Enables ordered operations on [`TableMut`] when the key type implements [`OrderedWhenSerialized`].
 ///
-/// `OrderedWhenEncoded` guarantees that the binary encoding of a key preserves its natural
+/// `OrderedWhenSerialized` guarantees that the binary encoding of a key preserves its natural
 /// ordering, making it safe to use range queries, ordered iteration, and prefix-based lookups.
 ///
 /// Without this marker trait, the encoded key order is undefined and may not correspond to the
@@ -30,7 +30,7 @@ use redb::ReadableTable;
 /// | `LockPoisoned`  | A panic occurred while holding a database lock    | Restart process or retry operation    |
 pub trait OrderedTable<'txn, K, V, KR>
 where
-    K: OrderedWhenEncoded + Codec<K> + for<'a> std::borrow::Borrow<&'a [u8]>,
+    K: OrderedWhenSerialized + Codec<K> + for<'a> std::borrow::Borrow<&'a [u8]>,
     V: Codec<V>,
     KR: for<'a> std::borrow::Borrow<&'a [u8]>
 {
@@ -138,7 +138,7 @@ where
 
 impl<'txn, K, V, KR> OrderedTable<'txn, K, V, KR> for TableMut<'txn, K, V>
 where
-    K: Codec<K> + for<'a> std::borrow::Borrow<&'a [u8]> + OrderedWhenEncoded,
+    K: Codec<K> + for<'a> std::borrow::Borrow<&'a [u8]> + OrderedWhenSerialized,
     V: Codec<V>,
     KR: for<'a> std::borrow::Borrow<&'a [u8]>
 {
@@ -169,7 +169,7 @@ where
     {
         let closure: Box<dyn for<'a, 'b> FnMut(&'a [u8], &'b [u8]) -> bool> = Box::new(
             move |k: &[u8], v: &[u8]| -> bool {
-                match (K::decode(k), V::decode(v)) {
+                match (K::deserialize(k), V::deserialize(v)) {
                     (Ok(k_dec), Ok(v_dec)) => predicate(&k_dec, &v_dec),
                     _ => false,
                 }
@@ -203,7 +203,7 @@ where
     {
         let closure: Box<dyn for<'a, 'b> Fn(&'a [u8], &'b [u8]) -> bool> = Box::new(
             move |k: &[u8], v: &[u8]| -> bool {
-                match (K::decode(k), V::decode(v)) {
+                match (K::deserialize(k), V::deserialize(v)) {
                     (Ok(k_dec), Ok(v_dec)) => predicate(&k_dec, &v_dec),
                     _ => false,
                 }
@@ -222,8 +222,8 @@ where
         self.redb_table
             .pop_first()?
             .map(|(k_guard, v_guard)| Ok::<_, Error>((
-                K::decode(k_guard.value())?,
-                V::decode(v_guard.value())?,
+                K::deserialize(k_guard.value())?,
+                V::deserialize(v_guard.value())?,
             )))
             .transpose()
     }
@@ -237,8 +237,8 @@ where
         self.redb_table
             .pop_last()?
             .map(|(k_guard, v_guard)| Ok::<_, Error>((
-                K::decode(k_guard.value())?,
-                V::decode(v_guard.value())?,
+                K::deserialize(k_guard.value())?,
+                V::deserialize(v_guard.value())?,
             )))
             .transpose()
     }
@@ -259,8 +259,8 @@ where
             .map(|entry| entry
                 .map_err(Into::into)
                 .and_then(|(k, v)| Ok::<_, Error>((
-                    K::decode(k.value())?,
-                    V::decode(v.value())?,
+                    K::deserialize(k.value())?,
+                    V::deserialize(v.value())?,
                 )))
             ))
     }
@@ -274,8 +274,8 @@ where
         self.redb_table
             .first()?
             .map(|(k_guard, v_guard)| Ok::<_, Error>((
-                K::decode(k_guard.value())?,
-                V::decode(v_guard.value())?,
+                K::deserialize(k_guard.value())?,
+                V::deserialize(v_guard.value())?,
             )))
             .transpose()
     }
@@ -289,8 +289,8 @@ where
         self.redb_table
             .last()?
             .map(|(k_guard, v_guard)| Ok::<_, Error>((
-                K::decode(k_guard.value())?,
-                V::decode(v_guard.value())?,
+                K::deserialize(k_guard.value())?,
+                V::deserialize(v_guard.value())?,
             )))
             .transpose()
     }

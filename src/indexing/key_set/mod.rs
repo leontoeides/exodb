@@ -5,8 +5,8 @@
 mod readable_key_set;
 mod upgradable_key_set;
 
-use crate::indexing::key_set::readable_key_set::ReadableKeySet;
-use crate::indexing::key_set::upgradable_key_set::UpgradableKeySet;
+pub use crate::indexing::key_set::readable_key_set::ReadableKeySet;
+pub use crate::indexing::key_set::upgradable_key_set::UpgradableKeySet;
 
 // -------------------------------------------------------------------------------------------------
 //
@@ -29,7 +29,7 @@ const _KEY_SET_FEATURE_COUNT: usize = count_features!(
 const _: () = {
     assert!(
         // Only one key-set index feature can be enabled. To fix: 1. open your `Cargo.toml` file, 2.
-        // find `exodb` under `[dependencies]`, 3. ensure only one key-set index feature is enabled.
+        // find `atlatl` under `[dependencies]`, 3. ensure only one key-set index feature is enabled.
         !(_KEY_SET_FEATURE_COUNT > 1),
         "Multiple key-set features enabled! Please enable only one of: \
         `ahash-key-set`, \

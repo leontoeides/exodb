@@ -1,7 +1,7 @@
-//! Error returned from the `exodb` crate. This includes codec errors, storage errors, database
+//! Error returned from the `atlatl` crate. This includes codec errors, storage errors, database
 //! errors, and so on.
 
-/// Error returned from the `exodb` crate. This includes codec errors, storage errors, database
+/// Error returned from the `atlatl` crate. This includes codec errors, storage errors, database
 /// errors, and so on.
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
@@ -23,9 +23,35 @@ pub enum Error {
         key: Vec<u8>,
     },
 
+    #[cfg(feature = "missing-not-return-error")]
+    #[error("secondary index `{index}` was not found or empty during `NOT` query")]
+    NotKeyMissing {
+        index: &'static str,
+        secondary_key: Option<Vec<u8>>,
+    },
+
+    #[error("buffer of {buffer_len} bytes will not fit in target buffer of {target_len} bytes")]
+    BufferTooLargeForTarget {
+        buffer_len: usize,
+        target_len: usize,
+    },
+
+    /// Should never happen. Returned when an `IndexMultiLookup` returned no primary table name.
+    #[error("primary table name not found for index lookup")]
+    MissingPrimaryTableName,
+
+    /// Should never happen. Returned when an `IndexMultiLookup` returned no index table name.
+    #[error("index table name not found for index lookup")]
+    MissingIndexTableName,
+
+    /// Should never happen. Returned when an `IndexMultiLookup` returned no index kind. For
+    // example, `IndexKind::Unique`, `IndexKind::NonUnique`, etc.
+    #[error("index kind not found for index lookup")]
+    MissingIndexKind,
+
     /// Failed to deserialise or deserialise a value using [`crate::Codec`].
     #[error(transparent)]
-    Codec(#[from] crate::codecs::Error),
+    Codec(#[from] crate::layers::serializers::Error),
 
     /// [redb](https://www.redb.org/)
     /// [transaction error](https://docs.rs/redb/latest/redb/enum.CommitError.html).
@@ -74,7 +100,7 @@ impl Error {
     /// # Examples
     ///
     /// ```
-    /// use exodb::Error;
+    /// use atlatl::Error;
     /// use std::io;
     ///
     /// fn validate_user(name: &str) -> Result<(), Error> {
@@ -90,7 +116,7 @@ impl Error {
     /// ```
     ///
     /// This is especially useful in contexts where indexing functions or database operations return
-    /// `Result<T, exodb::Error>`, and you want to surface application-specific error conditions
+    /// `Result<T, atlatl::Error>`, and you want to surface application-specific error conditions
     /// through the same error channel.
     ///
     /// # Errors
@@ -129,15 +155,15 @@ impl Error {
     /// * Returns [`Error::External`] with attached context.
     #[must_use]
     pub fn with_context(self, context: impl Into<String>) -> Self {
-        let ctx = context.into();
+        let context = context.into();
         let boxed: Box<dyn std::error::Error + Send + Sync + 'static> = match self {
             Self::External(inner) => {
-                let msg = format!("{ctx}: {inner}");
-                Box::new(std::io::Error::other(msg))
+                let message = format!("{context}: {inner}");
+                Box::new(std::io::Error::other(message))
             },
-            err => {
-                let msg = format!("{ctx}: {err}");
-                Box::new(std::io::Error::other(msg))
+            error => {
+                let message = format!("{context}: {error}");
+                Box::new(std::io::Error::other(message))
             },
         };
 
@@ -151,7 +177,7 @@ impl Error {
 
 #[cfg(feature = "anyhow")]
 impl From<anyhow::Error> for Error {
-    fn from(err: anyhow::Error) -> Self {
-        Self::External(err.into_boxed_dyn_error())
+    fn from(error: anyhow::Error) -> Self {
+        Self::External(error.into_boxed_dyn_error())
     }
 }

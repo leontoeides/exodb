@@ -6,7 +6,7 @@ mod archived_key_set;
 mod readable_key_set;
 mod upgradable_key_set;
 
-use crate::{Error, indexing::key_set::{ReadableKeySet, UpgradableKeySet}};
+use crate::indexing::key_set::ReadableKeySet;
 use std::collections::BTreeSet;
 
 // -------------------------------------------------------------------------------------------------
@@ -25,7 +25,7 @@ use std::collections::BTreeSet;
 /// # What is `KeySet`?
 ///
 /// `KeySet` lists all the primary keys (serialized as bytes) associated with a given index entry.
-/// It's how `exodb` manages non-unique indexes, where many records share the same indexed value,
+/// It's how `atlatl` manages non-unique indexes, where many records share the same indexed value,
 /// like several creatures living in the same habitat.
 ///
 /// Imagine that you're tracking creatures in a global biodiversity database:
@@ -76,7 +76,7 @@ use std::collections::BTreeSet;
 /// let reef_creatures = db.get_by_index(Habitat("Coral Reef"));
 /// ```
 ///
-/// `exodb` will:
+/// `atlatl` will:
 ///
 /// 1. Use the secondary key `"Coral Reef"` to search the habitat index.
 /// 2. Retrieve a `KeySet`: `[12, 48, 301]`
@@ -99,6 +99,20 @@ impl KeySet {
     // +---------------+
     // | Basic Methods |
     // +---------------+
+
+    /// Creates an empty `KeySet` with at least the specified capacity.
+    ///
+    /// # Notes
+    ///
+    /// * This method is provided for compatibility. Currently, `std::collections::BTreeSet` does
+    ///   not support capacity and `extend_reserve` is only available in the [nightly-only
+    ///   experimental API](https://github.com/rust-lang/rust/issues/72631).
+    ///
+    ///   This method will return a new `BTreeSet` without any set capacity.
+    #[inline]
+    pub fn with_capacity(_capacity: usize) -> Self {
+        Self(BTreeSet::<Vec<u8>>::new())
+    }
 
     /// Inserts the given primary key into the set.
     ///
@@ -162,7 +176,7 @@ impl KeySet {
     /// # Notes
     ///
     /// * The primary keys will be returned in serialized form, as bytes. If needed, each key can be
-    ///   deserialized into its full form by using `K::decode(item)`
+    ///   deserialized into its full form by using `K::deserialize(item)`
     ///
     /// * Primary keys are used to get actual records from the database.
     #[must_use]
@@ -182,26 +196,16 @@ impl KeySet {
     /// # Notes
     ///
     /// * The primary keys will be returned in serialized form, as bytes. If needed, each key can be
-    ///   deserialized into its full form by using `K::decode(item)`
+    ///   deserialized into its full form by using `K::deserialize(item)`
     ///
     /// * Primary keys are used to get actual records from the database.
-    ///
-    /// # Errors
-    ///
-    /// * Deserialization of `KeySet` could fail, if and when the `other` set needs to be upgraded
-    ///   from a read-only `ArchivedKeySet`.
-    pub fn union(
-        self,
-        other: impl ReadableKeySet + UpgradableKeySet
-    ) -> Result<Self, Error> {
-        let other = other.upgrade()?;
-
+    pub fn union(self, other: KeySet) -> Self {
         let union_result: BTreeSet<Vec<u8>> = self.0
             .into_iter()
             .chain(other.0)
             .collect();
 
-        Ok(Self(union_result))
+        Self(union_result)
     }
 
     /// Returns the difference between this set and another.
@@ -211,7 +215,7 @@ impl KeySet {
     /// # Notes
     ///
     /// * The primary keys will be returned in serialized form, as bytes. If needed, each key can be
-    ///   deserialized into its full form by using `K::decode(item)`
+    ///   deserialized into its full form by using `K::deserialize(item)`
     ///
     /// * Primary keys are used to get actual records from the database.
     #[must_use]
@@ -231,20 +235,10 @@ impl KeySet {
     /// # Notes
     ///
     /// * The primary keys will be returned in serialized form, as bytes. If needed, each key can be
-    ///   deserialized into its full form by using `K::decode(item)`
+    ///   deserialized into its full form by using `K::deserialize(item)`
     ///
     /// * Primary keys are used to get actual records from the database.
-    ///
-    /// # Errors
-    ///
-    /// * Deserialization of `KeySet` could fail, if and when the `other` set needs to be upgraded
-    ///   from a read-only `ArchivedKeySet`.
-    pub fn symmetric_difference(
-        self,
-        other: impl ReadableKeySet + UpgradableKeySet
-    ) -> Result<Self, Error> {
-        let other = other.upgrade()?;
-
+    pub fn symmetric_difference(self, other: KeySet) -> Self {
         // Start with all keys from `self`.
         let mut result = self.0;
 
@@ -257,7 +251,7 @@ impl KeySet {
             }
         }
 
-        Ok(Self(result))
+        Self(result)
     }
 }
 
@@ -281,15 +275,73 @@ impl std::ops::DerefMut for KeySet {
     }
 }
 
+impl IntoIterator for KeySet {
+    type Item = Vec<u8>;
+    type IntoIter = std::collections::btree_set::IntoIter<Vec<u8>>;
+
+    /// Returns an owned iterator over the primary keys in the index set.
+    ///
+    /// # Notes
+    ///
+    /// * The primary keys will be returned in serialized form, as raw bytes. If needed, each key
+    ///   can be deserialized into its full form by using `K::deserialize(item)`
+    ///
+    /// * Primary keys are used to get actual records from the database.
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
+    }
+}
+
+impl<'i> IntoIterator for &'i KeySet {
+    type Item = &'i Vec<u8>;
+    type IntoIter = std::collections::btree_set::Iter<'i, Vec<u8>>;
+
+    /// Returns an borrowed iterator over the primary keys in the index set.
+    ///
+    /// # Notes
+    ///
+    /// * The primary keys will be returned in serialized form, as raw bytes. If needed, each key
+    ///   can be deserialized into its full form by using `K::deserialize(item)`
+    ///
+    /// * Primary keys are used to get actual records from the database.
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
 impl FromIterator<Vec<u8>> for KeySet {
     /// Builds an `KeySet` collection from an iterator over primary keys.
     ///
     /// # Notes
     ///
-    /// * The primary keys will be returned in serialized form, as raw bytes. If needed, each key
-    ///   can be deserialized into its full form by using `K::decode(item)`
+    /// * The primary key must be represented in serialized form, as a slice of bytes.
     fn from_iter<I: IntoIterator<Item = Vec<u8>>>(iter: I) -> Self {
         Self(iter.into_iter().collect())
+    }
+}
+
+impl FromIterator<KeySet> for KeySet {
+    /// Builds an `KeySet` collection from an iterator over other key sets.
+    fn from_iter<I: IntoIterator<Item = KeySet>>(iter: I) -> Self {
+        let mut dest_key_set = KeySet::default();
+
+        iter
+            .into_iter()
+            .for_each(|src_key_set| dest_key_set.extend(src_key_set.0));
+
+        dest_key_set
+    }
+}
+
+impl Extend<Vec<u8>> for KeySet {
+    /// Extends a `KeySet` collection using an iterator over primary keys.
+    ///
+    /// # Notes
+    ///
+    /// * The primary keys will be returned in serialized form, as raw bytes. If needed, each key
+    ///   can be deserialized into its full form by using `K::deserialize(item)`
+    fn extend<T: IntoIterator<Item=Vec<u8>>>(&mut self, iter: T) {
+       self.0.extend(iter)
     }
 }
 
@@ -305,7 +357,7 @@ fn set_operations() {
 
     let result = a
         .intersection(&b)     // [3]
-        .union(c).unwrap()    // [2, 3]
+        .union(c)             // [2, 3]
         .difference(&b);      // [2]
 
     let expected = KeySet::from_iter(vec![vec![2]]);

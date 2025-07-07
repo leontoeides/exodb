@@ -1,7 +1,7 @@
 #[derive(thiserror::Error, Debug)]
 pub enum Error {
     #[error(transparent)]
-    Codec(#[from] crate::codecs::Error),
+    Codec(#[from] crate::layers::serializers::Error),
 
     #[error(transparent)]
     RedbCommit(#[from] redb::CommitError),
@@ -21,7 +21,7 @@ pub enum Error {
 
 use redb::ReadableTable;
 use redb::Table;
-use crate::codecs::Codec;
+use crate::layers::serializers::Codec;
 use std::marker::PhantomData;
 
 /// A typed wrapper around a redb table for a specific key/value type pair.
@@ -53,8 +53,8 @@ where
     }
 
     pub fn insert(&mut self, key: &K, value: &V) -> Result<(), crate::store::Error> {
-        let key_bytes = K::encode(key)?;
-        let value_bytes = V::encode(value)?;
+        let key_bytes = K::serialize(key)?;
+        let value_bytes = V::serialize(value)?;
         {
             let _ = self.table.insert(key_bytes.as_slice(), value_bytes.as_slice())?;
         }
@@ -62,16 +62,16 @@ where
     }
 
     pub fn get(&self, key: &K) -> Result<Option<V>, crate::store::Error> {
-        let key_bytes = K::encode(key)?;
+        let key_bytes = K::serialize(key)?;
         if let Some(val) = self.table.get(key_bytes.as_slice())? {
-            Ok(Some(V::decode(val.value())?))
+            Ok(Some(V::deserialize(val.value())?))
         } else {
             Ok(None)
         }
     }
 
     pub fn delete(&mut self, key: &K) -> Result<(), crate::store::Error> {
-        let key_bytes = K::encode(key)?;
+        let key_bytes = K::serialize(key)?;
         self.table.remove(key_bytes.as_slice())?;
         Ok(())
     }
@@ -82,8 +82,8 @@ where
         let iter = self.table.iter()?;
         Ok(iter.map(|entry| {
             let (k, v) = entry?;
-            let key = K::decode(k.value())?;
-            let val = V::decode(v.value())?;
+            let key = K::deserialize(k.value())?;
+            let val = V::deserialize(v.value())?;
             Ok((key, val))
         }))
     }

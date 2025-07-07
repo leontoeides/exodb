@@ -4,7 +4,7 @@
 //! It is ideal for use cases where key ordering is not required.
 //!
 //! Range queries and prefix scans are disabled by default and only available when the key type also
-//! implements [`crate::codecs::OrderedWhenEncoded`].
+//! implements [`crate::layers::serializers::OrderedWhenSerialized`].
 
 mod table_mut;
 

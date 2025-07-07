@@ -37,7 +37,7 @@ impl ArchivedKeySet {
 //
 // Readable Key-Set Implementation
 
-impl ReadableKeySet for ArchivedKeySet {
+impl ReadableKeySet for &ArchivedKeySet {
     // +----------------------+
     // | Basic Set Operations |
     // +----------------------+
@@ -122,7 +122,7 @@ impl ReadableKeySet for ArchivedKeySet {
 //
 // Upgradable Key-Set Implementation
 
-impl crate::indexing::key_set::UpgradableKeySet for ArchivedKeySet {
+impl crate::indexing::key_set::UpgradableKeySet for &ArchivedKeySet {
     /// Upgrades the [`ArchivedKeySet`] into an owned & mutable [`KeySet`] by completing the
     /// `rkyv` deserialization process, if necessary.
     ///
@@ -134,7 +134,7 @@ impl crate::indexing::key_set::UpgradableKeySet for ArchivedKeySet {
     ///   fails.
     #[inline]
     fn upgrade(self) -> Result<KeySet, crate::Error> {
-        let deserialized = rkyv::deserialize::<KeySet, rkyv::rancor::Error>(&self)?;
+        let deserialized = rkyv::deserialize::<KeySet, rkyv::rancor::Error>(self)?;
         Ok(deserialized)
     }
 }
