@@ -1,0 +1,399 @@
+Folder PATH listing for volume Users, Games
+Volume serial number is 30C7-32D3
+D:.
+¦   error.rs
+¦   files.txt
+¦   lib.rs
+¦   store.rs
+¦   
++---async
+¦       mod.rs
+¦       
++---core
+¦   +---key_ring
+¦       ¦   key.rs
+¦       ¦   
+¦       +---kdf
+¦               blake3.rs
+¦               error.rs
+¦               key.rs
+¦               mod.rs
+¦               sha256.rs
+¦               
++---db
+¦   ¦   database.rs
+¦   ¦   mod.rs
+¦   ¦   
+¦   +---databases
+¦   +---tables
+¦   ¦       mod.rs
+¦   ¦       read.rs
+¦   ¦       write.rs
+¦   ¦       
+¦   +---transactions
+¦           mod.rs
+¦           read.rs
+¦           write.rs
+¦           
++---indexing
+¦   ¦   mod.rs
+¦   ¦   
+¦   +---key_set
+¦       ¦   mod.rs
+¦       ¦   readable_key_set.rs
+¦       ¦   upgradable_key_set.rs
+¦       ¦   
+¦       +---ahash_set
+¦       ¦       archived_key_set.rs
+¦       ¦       mod.rs
+¦       ¦       readable_key_set.rs
+¦       ¦       upgradable_key_set.rs
+¦       ¦       
+¦       +---b_tree_set
+¦       ¦       archived_key_set.rs
+¦       ¦       mod.rs
+¦       ¦       readable_key_set.rs
+¦       ¦       upgradable_key_set.rs
+¦       ¦       
+¦       +---hash_set
+¦       ¦       archived_key_set.rs
+¦       ¦       mod.rs
+¦       ¦       readable_key_set.rs
+¦       ¦       upgradable_key_set.rs
+¦       ¦       
+¦       +---vec
+¦               archived_key_set.rs
+¦               mod.rs
+¦               readable_key_set.rs
+¦               upgradable_key_set.rs
+¦               
++---layers
+¦   ¦   error.rs
+¦   ¦   mod.rs
+¦   ¦   
+¦   +---compressors
+¦   ¦   ¦   mod.rs
+¦   ¦   ¦   
+¦   ¦   +---core
+¦   ¦   ¦   ¦   compressible.rs
+¦   ¦   ¦   ¦   level.rs
+¦   ¦   ¦   ¦   method.rs
+¦   ¦   ¦   ¦   mod.rs
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---dictionary_bytes
+¦   ¦   ¦   ¦       mod.rs
+¦   ¦   ¦   ¦       standard.rs
+¦   ¦   ¦   ¦       zstd.rs
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---errors
+¦   ¦   ¦   ¦       compress.rs
+¦   ¦   ¦   ¦       compression.rs
+¦   ¦   ¦   ¦       decompress.rs
+¦   ¦   ¦   ¦       mod.rs
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---traits
+¦   ¦   ¦           dictionary.rs
+¦   ¦   ¦           mod.rs
+¦   ¦   ¦           standard.rs
+¦   ¦   ¦           
+¦   ¦   +---impls
+¦   ¦       ¦   brotli.rs
+¦   ¦       ¦   bzip2.rs
+¦   ¦       ¦   flate2_deflate.rs
+¦   ¦       ¦   flate2_gzip.rs
+¦   ¦       ¦   mod.rs
+¦   ¦       ¦   
+¦   ¦       +---flate2_zlib
+¦   ¦       ¦       dictionary.rs
+¦   ¦       ¦       mod.rs
+¦   ¦       ¦       standard.rs
+¦   ¦       ¦       
+¦   ¦       +---lz4_flex
+¦   ¦       ¦       dictionary.rs
+¦   ¦       ¦       mod.rs
+¦   ¦       ¦       standard.rs
+¦   ¦       ¦       
+¦   ¦       +---zstd
+¦   ¦               dictionary.rs
+¦   ¦               mod.rs
+¦   ¦               standard.rs
+¦   ¦               
+¦   +---core
+¦   ¦   ¦   mod.rs
+¦   ¦   ¦   value.rs
+¦   ¦   ¦   
+¦   ¦   +---bytes
+¦   ¦   ¦       metadata.rs
+¦   ¦   ¦       mod.rs
+¦   ¦   ¦       
+¦   ¦   +---descriptors
+¦   ¦   ¦       direction.rs
+¦   ¦   ¦       error.rs
+¦   ¦   ¦       layer.rs
+¦   ¦   ¦       mod.rs
+¦   ¦   ¦       
+¦   ¦   +---old_value_buf
+¦   ¦   ¦   ¦   compression.rs
+¦   ¦   ¦   ¦   correction.rs
+¦   ¦   ¦   ¦   encryption.rs
+¦   ¦   ¦   ¦   error.rs
+¦   ¦   ¦   ¦   metadata.rs
+¦   ¦   ¦   ¦   mod.rs
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---read
+¦   ¦   ¦   ¦       mod.rs
+¦   ¦   ¦   ¦       read_serializer.rs
+¦   ¦   ¦   ¦       read_serializer_rkyv.rs
+¦   ¦   ¦   ¦       read_serializer_zero_copy.rs
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---serialization
+¦   ¦   ¦   ¦       mod.rs
+¦   ¦   ¦   ¦       serializer.rs
+¦   ¦   ¦   ¦       serializer_rkyv.rs
+¦   ¦   ¦   ¦       serializer_zero_copy.rs
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---tests
+¦   ¦   ¦   ¦       mod.rs
+¦   ¦   ¦   ¦       serializer.rs
+¦   ¦   ¦   ¦       serializer_zero_copy.rs
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---write
+¦   ¦   ¦           mod.rs
+¦   ¦   ¦           write_serializer.rs
+¦   ¦   ¦           write_serializer_rkyv.rs
+¦   ¦   ¦           write_serializer_zero_copy.rs
+¦   ¦   ¦           
+¦   ¦   +---old_value_or_bytes
+¦   ¦   ¦       mod.rs
+¦   ¦   ¦       serializer.rs
+¦   ¦   ¦       serializer_rkyv.rs
+¦   ¦   ¦       serializer_zero_copy.rs
+¦   ¦   ¦       
+¦   ¦   +---tail_readers
+¦   ¦   ¦       error.rs
+¦   ¦   ¦       mod.rs
+¦   ¦   ¦       tail_reader.rs
+¦   ¦   ¦       tail_reader_mut.rs
+¦   ¦   ¦       
+¦   ¦   +---value_or_bytes
+¦   ¦           error.rs
+¦   ¦           mod.rs
+¦   ¦           
+¦   +---correctors
+¦   ¦   ¦   mod.rs
+¦   ¦   ¦   
+¦   ¦   +---core
+¦   ¦   ¦   ¦   correctable.rs
+¦   ¦   ¦   ¦   corrector.rs
+¦   ¦   ¦   ¦   level.rs
+¦   ¦   ¦   ¦   metadata.rs
+¦   ¦   ¦   ¦   method.rs
+¦   ¦   ¦   ¦   mod.rs
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---errors
+¦   ¦   ¦           correction.rs
+¦   ¦   ¦           mod.rs
+¦   ¦   ¦           protect.rs
+¦   ¦   ¦           recover.rs
+¦   ¦   ¦           
+¦   ¦   +---impls
+¦   ¦       ¦   mod.rs
+¦   ¦       ¦   
+¦   ¦       +---reed_solomon
+¦   ¦           ¦   corrector.rs
+¦   ¦           ¦   error.rs
+¦   ¦           ¦   mod.rs
+¦   ¦           ¦   reed_solomon.rs
+¦   ¦           ¦   tests.rs
+¦   ¦           ¦   
+¦   ¦           +---parameters
+¦   ¦                   error.rs
+¦   ¦                   mod.rs
+¦   ¦                   
+¦   +---encryptors
+¦   ¦   ¦   mod.rs
+¦   ¦   ¦   
+¦   ¦   +---core
+¦   ¦   ¦   ¦   encryptable.rs
+¦   ¦   ¦   ¦   encryptor.rs
+¦   ¦   ¦   ¦   method.rs
+¦   ¦   ¦   ¦   mod.rs
+¦   ¦   ¦   ¦   
+¦   ¦   ¦   +---errors
+¦   ¦   ¦   ¦       decrypt.rs
+¦   ¦   ¦   ¦       encrypt.rs
+¦   ¦   ¦   ¦       encryption.rs
+¦   ¦   ¦   ¦       mod.rs
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---key_bytes
+¦   ¦   ¦   ¦       error.rs
+¦   ¦   ¦   ¦       mod.rs
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---nonce
+¦   ¦   ¦   ¦       error.rs
+¦   ¦   ¦   ¦       mod.rs
+¦   ¦   ¦   ¦       
+¦   ¦   ¦   +---parameters
+¦   ¦   ¦           error.rs
+¦   ¦   ¦           mod.rs
+¦   ¦   ¦           
+¦   ¦   +---impls
+¦   ¦       ¦   mod.rs
+¦   ¦       ¦   
+¦   ¦       +---aes_gcm
+¦   ¦       ¦       encryptor.rs
+¦   ¦       ¦       mod.rs
+¦   ¦       ¦       
+¦   ¦       +---chacha20
+¦   ¦               encryptor.rs
+¦   ¦               mod.rs
+¦   ¦               
+¦   +---serializers
+¦       ¦   mod.rs
+¦       ¦   
+¦       +---core
+¦       ¦   ¦   method.rs
+¦       ¦   ¦   mod.rs
+¦       ¦   ¦   serializable.rs
+¦       ¦   ¦   
+¦       ¦   +---errors
+¦       ¦   ¦       deserialize.rs
+¦       ¦   ¦       mod.rs
+¦       ¦   ¦       serialization.rs
+¦       ¦   ¦       serialize.rs
+¦       ¦   ¦       
+¦       ¦   +---traits
+¦       ¦       ¦   mod.rs
+¦       ¦       ¦   
+¦       ¦       +---rkyv
+¦       ¦       ¦       mod.rs
+¦       ¦       ¦       ordered_when_serialized.rs
+¦       ¦       ¦       serializer.rs
+¦       ¦       ¦       
+¦       ¦       +---standard
+¦       ¦               mod.rs
+¦       ¦               ordered_when_serialized.rs
+¦       ¦               ordering_discovery_tests.rs
+¦       ¦               serializer.rs
+¦       ¦               
+¦       +---impls
+¦           ¦   mod.rs
+¦           ¦   
+¦           +---bincode_native
+¦           ¦       mod.rs
+¦           ¦       ordered_when_serialized.rs
+¦           ¦       serializer.rs
+¦           ¦       
+¦           +---bincode_serde
+¦           ¦       mod.rs
+¦           ¦       ordered_when_serialized.rs
+¦           ¦       serde_safety.rs
+¦           ¦       serializer.rs
+¦           ¦       
+¦           +---bitcode_native
+¦           ¦       mod.rs
+¦           ¦       ordered_when_serialized.rs
+¦           ¦       serializer.rs
+¦           ¦       
+¦           +---bitcode_serde
+¦           ¦       mod.rs
+¦           ¦       ordered_when_serialized.rs
+¦           ¦       serde_safety.rs
+¦           ¦       serializer.rs
+¦           ¦       
+¦           +---borsh
+¦           ¦       mod.rs
+¦           ¦       ordered_when_serialized.rs
+¦           ¦       serializer.rs
+¦           ¦       
+¦           +---musli_descriptive
+¦           ¦       mod.rs
+¦           ¦       ordered_when_serialized.rs
+¦           ¦       serializer.rs
+¦           ¦       
+¦           +---musli_storage
+¦           ¦       mod.rs
+¦           ¦       ordered_when_serialized.rs
+¦           ¦       serializer.rs
+¦           ¦       
+¦           +---musli_wire
+¦           ¦       mod.rs
+¦           ¦       ordered_when_serialized.rs
+¦           ¦       serializer.rs
+¦           ¦       
+¦           +---musli_zerocopy
+¦           ¦       mod.rs
+¦           ¦       ordered_when_serialized.rs
+¦           ¦       serializer.rs
+¦           ¦       
+¦           +---postcard_serde
+¦           ¦       mod.rs
+¦           ¦       ordered_when_serialized.rs
+¦           ¦       serde_safety.rs
+¦           ¦       serializer.rs
+¦           ¦       
+¦           +---rkyv
+¦           ¦       mod.rs
+¦           ¦       ordered_when_serialized.rs
+¦           ¦       serializer_borrowing.rs
+¦           ¦       
+¦           +---rmp_serde
+¦           ¦       mod.rs
+¦           ¦       ordered_when_serialized.rs
+¦           ¦       serde_safety.rs
+¦           ¦       serializer.rs
+¦           ¦       
+¦           +---zerocopy
+¦                   mod.rs
+¦                   ordered_when_serialized.rs
+¦                   serializer.rs
+¦                   
++---querying
+¦       mod.rs
+¦       
++---redb
+¦   ¦   database.rs
+¦   ¦   mod.rs
+¦   ¦   
+¦   +---databases
+¦   +---tables
+¦   ¦       mod.rs
+¦   ¦       read.rs
+¦   ¦       write.rs
+¦   ¦       
+¦   +---transactions
+¦           mod.rs
+¦           read.rs
+¦           write.rs
+¦           
++---typed
+    ¦   database.rs
+    ¦   mod.rs
+    ¦   
+    +---table_mut
+    ¦       extract_if.rs
+    ¦       mod.rs
+    ¦       ordered_table.rs
+    ¦       range.rs
+    ¦       
+    +---table_ref
+    ¦       atlatl.rs
+    ¦       mod.rs
+    ¦       ordered_table.rs
+    ¦       range.rs
+    ¦       redb.rs
+    ¦       
+    +---transaction
+        ¦   error.rs
+        ¦   mod.rs
+        ¦   read_new.rs
+        ¦   write_new.rs
+        ¦   
+        +---read
+        ¦       mod.rs
+        ¦       non_unique.rs
+        ¦       queries.rs
+        ¦       
+        +---write
+                mod.rs
+                

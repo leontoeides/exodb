@@ -1,37 +1,32 @@
-//! Data transformation primitives: serialization, compression, correction, encryption.
+//! Support for data transformation layers: serialization, compression, correction, and encryption.
 
-pub mod descriptors;
-pub use crate::layers::descriptors::Descriptor;
-pub use crate::layers::descriptors::Direction;
-pub use crate::layers::descriptors::Layer;
+pub mod core;
 
-pub mod error;
+mod error;
 pub use crate::layers::error::Error;
-
-pub mod tail_reader;
-pub use crate::layers::tail_reader::TailReader;
-
-mod value;
-pub use crate::layers::value::Value;
-
-mod value_buf;
-pub use crate::layers::value_buf::ValueBuf;
 
 // -------------------------------------------------------------------------------------------------
 //
-// Layer Implementations
+// Serialization Layer
 
 #[cfg(feature = "serializers")]
 pub mod serializers;
 
 #[cfg(feature = "serializers")]
-pub use crate::layers::serializers::Serializer;
+pub use crate::layers::serializers::Serializable;
 
 #[cfg(feature = "serializers")]
-pub use crate::layers::serializers::Serializable;
+pub use crate::layers::serializers::Serializer;
+
+// -------------------------------------------------------------------------------------------------
+//
+// Compression Layer
 
 #[cfg(feature = "compressors")]
 pub mod compressors;
+
+#[cfg(feature = "compressors")]
+pub use crate::layers::compressors::ActiveCompressor;
 
 #[cfg(feature = "compressors")]
 pub use crate::layers::compressors::Compressor;
@@ -39,8 +34,15 @@ pub use crate::layers::compressors::Compressor;
 #[cfg(feature = "compressors")]
 pub use crate::layers::compressors::Compressible;
 
+// -------------------------------------------------------------------------------------------------
+//
+// Error Correction Layer
+
 #[cfg(feature = "correctors")]
 pub mod correctors;
+
+#[cfg(feature = "correctors")]
+pub use crate::layers::correctors::ActiveCorrector;
 
 #[cfg(feature = "correctors")]
 pub use crate::layers::correctors::Corrector;
@@ -48,8 +50,15 @@ pub use crate::layers::correctors::Corrector;
 #[cfg(feature = "correctors")]
 pub use crate::layers::correctors::Correctable;
 
+// -------------------------------------------------------------------------------------------------
+//
+// Encryption Layer
+
 #[cfg(feature = "encryptors")]
 pub mod encryptors;
+
+#[cfg(feature = "encryptors")]
+pub use crate::layers::encryptors::ActiveEncryptor;
 
 #[cfg(feature = "encryptors")]
 pub use crate::layers::encryptors::Encryptor;

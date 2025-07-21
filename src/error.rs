@@ -1,9 +1,12 @@
 //! Error returned from the `atlatl` crate. This includes codec errors, storage errors, database
 //! errors, and so on.
 
+// -------------------------------------------------------------------------------------------------
+//
 /// Error returned from the `atlatl` crate. This includes codec errors, storage errors, database
 /// errors, and so on.
 #[derive(thiserror::Error, Debug)]
+#[non_exhaustive]
 pub enum Error {
     #[error("secondary index `{index}` already maps key to a different primary record")]
     IndexCollision {
@@ -48,10 +51,6 @@ pub enum Error {
     // example, `IndexKind::Unique`, `IndexKind::NonUnique`, etc.
     #[error("index kind not found for index lookup")]
     MissingIndexKind,
-
-    /// Failed to deserialise or deserialise a value using [`crate::Codec`].
-    #[error(transparent)]
-    Codec(#[from] crate::layers::serializers::Error),
 
     /// [redb](https://www.redb.org/)
     /// [transaction error](https://docs.rs/redb/latest/redb/enum.CommitError.html).

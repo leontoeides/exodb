@@ -35,6 +35,9 @@
    clippy::pedantic,
    clippy::style,
 )]
+#![allow(
+    clippy::multiple_crate_versions, // Due to upstream crates, can't do much about this
+)]
 
 // #[cfg(debug_assertions)]
 // debug_assert_eq!(cfg!(target_endian = "little"), true, "Atlatl only supports little-endian targets.");
@@ -50,13 +53,12 @@ pub mod layers;
 // #[cfg(feature = "redb-pass-through")]
 // pub mod redb;
 
-// mod error;
-// pub use crate::error::Error;
+// pub mod db;
+
+mod error;
+pub use crate::error::Error;
 
 // pub mod indexing;
 // pub mod querying;
-
-// mod data_buf;
-// pub use crate::data_buf::ValueBuf;
 
 // pub mod typed;

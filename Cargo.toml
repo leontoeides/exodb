@@ -17,15 +17,18 @@ default = [
 	"serde-safety", 				# Enables strict serializer safety enforcement.
 	"index-safety", 				# Prevents users from mutating tables directly.
 
-	"serializer-rmp-serde",			# Selects MessagePack for serialization.
+	"serializer-messagepack",		# Selects MessagePack for serialization.
 	"compress-lz4",					# Selects LZ4 for compression.
 	"ecc-reed-solomon",				# Selects Reed-Solomon for ECC error correction.
-	"encrypt-aes-gcm",				# Selects ChaCha20Poly1305 for encryption.
+	"encrypt-aes-gcm",				# Selects AES-GCM for encryption.
+	"kdf-blake3",					# Selects BLAKE3 for hashing encryption keys.
 	"key-set-ahash",				# Selects AHash as the key-set implementor.
 
+	"compress-dictionaries", 		# Enable dictionary support for compatible compressors.
 	"missing-not-return-empty", 	# Return an empty set when an unary NOT index returns nothing.
 	"anyhow",						# Atlatl's main error type can be extended with `anyhow`
-	"serde"							# Adds serde support for types wherever possible.
+	"serde",						# Adds serde support for types wherever possible.
+	"redb-pass-through"
 ]
 
 # SERIALIZERS
@@ -40,10 +43,11 @@ serializer-borsh = ["serializers", "dep:borsh"]
 serializer-musli-descriptive = ["serializers", "dep:musli", "musli/descriptive"]
 serializer-musli-storage = ["serializers", "dep:musli", "musli/storage"]
 serializer-musli-wire = ["serializers", "dep:musli", "musli/wire"]
+serializer-musli-zerocopy = ["serializers", "dep:musli-zerocopy"]
 serializer-postcard-serde = ["serializers", "dep:postcard", "postcard/use-std", "dep:serde"]
-serializer-rkyv = [] # rkyv is a mandatory dependency for zero-copy key-sets
-serializer-rmp-serde = ["serializers", "dep:rmp-serde", "dep:serde"] # Great serde compatibility.
-serializer-zerocopy = ["serializers", "dep:zerocopy"]
+serializer-rkyv = ["serializers"] # note: rkyv is a mandatory dependency for key-sets
+serializer-messagepack = ["serializers", "dep:rmp-serde", "dep:serde"] # Great serde compatibility.
+serializer-zerocopy = ["serializers", "dep:zerocopy", "zerocopy/std"]
 
 # COMPRESSORS
 #
@@ -53,13 +57,16 @@ serializer-zerocopy = ["serializers", "dep:zerocopy"]
 #
 # If you want to enable support for data compression, add one of the following features to your
 # project's Cargo.toml:
-compress-brotli = ["compressors", "dep:brotli"] # Archival & read-heavy workloads
-compress-bzip2 = ["compressors", "dep:bzip2", "bzip2/default"] #  Legacy or max-ratio scenarios
-compress-deflate = ["compressors", "dep:flate2", "flate2/rust_backend"] # General purpose, balanced
-compress-gzip = ["compressors", "dep:flate2", "flate2/rust_backend"] # General purpose, balanced
-compress-lz4 = ["compressors", "dep:lz4_flex"] # High-speed, low-latency workloads
-compress-zlib = ["compressors", "dep:flate2", "flate2/rust_backend"] # General purpose, balanced
-compress-zstd = ["compressors", "dep:zstd"] # Archival & read-heavy workloads
+compress-brotli = ["compressors", "dep:brotli"] # No dictionary support; archival & read-heavy workloads
+compress-bzip2 = ["compressors", "dep:bzip2", "bzip2/default"] #  No dictionary support; legacy or max-ratio scenarios
+compress-deflate = ["compressors", "dep:flate2", "flate2/rust_backend"] # No dictionary support; general purpose, balanced
+compress-gzip = ["compressors", "dep:flate2", "flate2/rust_backend"] # No dictionary support; general purpose, balanced
+compress-lz4 = ["compressors", "dep:lz4_flex"] # Dictionary support; high-speed, low-latency workloads
+compress-zlib = ["compressors", "dep:flate2", "flate2/any_zlib", "flate2/zlib-rs"] # Dictionary support; general purpose, balanced
+compress-zstd = ["compressors", "dep:zstd", "zstd/experimental"] # Dictionary support; archival & read-heavy workloads
+
+# Enable for dictionary support with compatible compressors.
+compress-dictionaries = []
 
 # ENCRYPTORS
 #
@@ -68,8 +75,15 @@ compress-zstd = ["compressors", "dep:zstd"] # Archival & read-heavy workloads
 #
 # If you want to enable support for encryption, add one of the following features to your project's
 # Cargo.toml:
-encrypt-aes-gcm = ["encryptors", "dep:aes-gcm", "aes-gcm/std", "dep:generic-array"]
-encrypt-chacha20 = ["encryptors", "dep:chacha20poly1305", "chacha20poly1305/std"]
+encrypt-aes-gcm = ["encryptors", "dep:aes-gcm", "aes-gcm/std"] # Best for servers and personal computers
+encrypt-chacha20 = ["encryptors", "dep:chacha20poly1305", "chacha20poly1305/std"] # Best for mobile devices
+
+# KDF Key Derivation Function
+#
+# A cryptographic Key Derivation Function (KDF) is a process that generates secure secret keys from
+# a source of initial keying material, such as a password or a master key.
+kdf-blake3 = ["blake3"]
+kdf-sha256 = ["ring"]
 
 # CORRECTORS
 #
@@ -119,7 +133,7 @@ missing-not-return-empty = [] # Recommended in production to avoid accidental ov
 missing-not-return-all = [] # Recommended during development if you're doing exploratory queries
 missing-not-return-error = [] # Recommended when running critical queries where exclusion failures error
 
-# This feature enables `serde_flow` versioning and compatibility framework integrations:
+# Enables `serde_flow` versioning and compatibility framework integrations:
 serde-flow = ["dep:serde_flow"]
 
 # Enables serialization. Don't enable this directly. Select a serializer feature from the above
@@ -151,6 +165,7 @@ bincode = { version = "2.0", optional = true }
 bitcode = { version = "0.6", optional = true }
 borsh = { version = "1.5", optional = true }
 musli = { version = "0.0", optional = true }
+musli-zerocopy = { version = "0.0", optional = true }
 postcard = { version = "1.1", optional = true }
 rmp-serde = { version = "1.3", optional = true }
 zerocopy = { version = "0.8", optional = true }
@@ -167,7 +182,10 @@ zstd = { version = "0.13", optional = true }
 # Encryptor features
 aes-gcm = { version = "0.10", optional = true }
 chacha20poly1305 = { version = "0.10", optional = true }
-generic-array = { version = "1.2", optional = true }
+
+# KDF Key Derivation Function features
+blake3 = { version = "1.8", optional = true }
+ring = { version = "0.17", optional = true }
 
 # Corrector features
 reed-solomon-erasure = { version = "6.0", optional = true }
@@ -176,10 +194,12 @@ crc32fast = { version = "1.4", optional = true }
 # Key-set features
 ahash = { version = "0.8", optional = true }
 
-# Integrations
+# Miscellaneous
 anyhow = { version = "1.0", optional = true }
 serde_flow = { version = "1.1", optional = true }
 
 # Development
 chrono = { version = "0.4", features = ["serde"] }
 pin-project = "1.1"
+quickcheck = "1.0"
+zerocopy-derive = "0.8"

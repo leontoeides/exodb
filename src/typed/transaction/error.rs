@@ -4,6 +4,7 @@
 /// Error returned from the `atlatl` crate. This includes codec errors, storage errors, database
 /// errors, and so on.
 #[derive(thiserror::Error, Debug)]
+#[non_exhaustive]
 pub enum Error {
     /// [redb](https://www.redb.org/)
     /// [transaction error](https://docs.rs/redb/latest/redb/enum.CommitError.html).
