@@ -24,4 +24,4 @@ mod tests;
 const DATA_LEN_MIN: usize = 3;
 
 /// Maximum data length in bytes. Data larger than this will not be encoded or decoded.
-const DATA_LEN_MAX: usize = 1_073_741_824; // 1 Gygabite, safe for GF(2⁸)
+const DATA_LEN_MAX: usize = u32::MAX as usize;

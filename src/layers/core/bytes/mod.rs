@@ -49,8 +49,8 @@ use std::borrow::Cow;
 ///   application.
 #[derive(Clone, Debug, Default)]
 pub struct Bytes<'b> {
-    metadata: Metadata,
-    data: Cow<'b, [u8]>
+    pub(crate) metadata: Metadata,
+    pub(crate) data: Cow<'b, [u8]>
 }
 
 // -------------------------------------------------------------------------------------------------
@@ -69,26 +69,22 @@ impl<'b> Bytes<'b> {
     }
 
     /// Returns the number of bytes in the bytes buffer.
-        #[must_use]
-    pub fn len(&self) -> usize {
+    #[must_use] pub fn len(&self) -> usize {
         self.data.len()
     }
 
     /// Returns `true` if the bytes buffer is empty.
-        #[must_use]
-    pub fn is_empty(&self) -> bool {
+    #[must_use] pub fn is_empty(&self) -> bool {
         self.data.is_empty()
     }
 
     /// Returns an immutable slice of the bytes. Does not allocate.
-        #[must_use]
-    pub fn as_slice(&'b self) -> &'b [u8] {
+    #[must_use] pub fn as_slice(&'b self) -> &'b [u8] {
         self.data.as_ref()
     }
 
     /// Unwraps a `Bytes` buffer into the underlying `Cow<[u8]>` bytes, discarding the metadata.
-        #[must_use]
-    pub fn into_bytes(self) -> Cow<'b, [u8]> {
+    #[must_use] pub fn into_bytes(self) -> Cow<'b, [u8]> {
         self.into()
     }
 
@@ -125,8 +121,7 @@ impl<'b> Bytes<'b> {
     ///
     /// This is useful when an operation requires unencumbered & owned data, but the metadata needs
     /// to be preserved.
-        #[must_use]
-    pub fn into_parts(self) -> (Metadata, Cow<'b, [u8]>) {
+    #[must_use] pub(crate) fn into_parts(self) -> (Metadata, Cow<'b, [u8]>) {
         self.into()
     }
 
@@ -166,17 +161,35 @@ impl<'b> Bytes<'b> {
     ///
     /// This is useful when an operation requires unencumbered & owned data, but the metadata needs
     /// to be preserved.
-        #[must_use]
-    pub fn from_parts(metadata: Metadata, data: Cow<'b, [u8]>) -> Self {
+    #[must_use] pub(crate) fn from_parts(metadata: Metadata, data: Cow<'b, [u8]>) -> Self {
         (metadata, data).into()
     }
 
     /// Instantiates a `Bytes` buffer from an owned `Vec<u8>` and automatically marks the data as
     /// “recovered.”
-        pub(crate) fn from_recovered_data(recovered_data: Vec<u8>) -> Self {
+    #[must_use] pub(crate) fn from_recovered_data(recovered_data: Vec<u8>) -> Self {
         Bytes {
             metadata: Metadata::default(),
             data: recovered_data.into()
+        }
+    }
+
+    /// Truncates the internal buffer to the specified length, keeping only the first `len` bytes.
+    ///
+    /// This method modifies the buffer in-place by shortening it to the given length.
+    ///
+    /// * For borrowed data, it creates a new slice reference to the truncated portion.
+    /// * For owned data, it truncates the vector directly.
+    ///
+    /// The metadata is preserved unchanged.
+    ///
+    /// If `len` is greater than or equal to the current length, no truncation occurs.
+    pub fn truncate(&mut self, len: usize) {
+        if len < self.data.len() {
+            match &mut self.data {
+                Cow::Borrowed(slice) => self.data = Cow::Borrowed(&slice[..len]),
+                Cow::Owned(vec) => vec.truncate(len),
+            }
         }
     }
 }

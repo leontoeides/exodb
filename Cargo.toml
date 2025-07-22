@@ -17,7 +17,7 @@ default = [
 	"serde-safety", 				# Enables strict serializer safety enforcement.
 	"index-safety", 				# Prevents users from mutating tables directly.
 
-	"serializer-messagepack",		# Selects MessagePack for serialization.
+	"serialize-messagepack",		# Selects MessagePack for serialization.
 	"compress-lz4",					# Selects LZ4 for compression.
 	"ecc-reed-solomon",				# Selects Reed-Solomon for ECC error correction.
 	"encrypt-aes-gcm",				# Selects AES-GCM for encryption.
@@ -35,19 +35,19 @@ default = [
 #
 # If you want to enable support for data serialization, enable one of the following features in your
 # project's Cargo.toml:
-serializer-bincode-native = ["serializers", "dep:bincode"]
-serializer-bincode-serde = ["serializers", "dep:bincode", "bincode/serde", "dep:serde"]
-serializer-bitcode-native = ["serializers", "dep:bitcode"]
-serializer-bitcode-serde = ["serializers", "dep:bitcode", "bitcode/serde", "dep:serde"]
-serializer-borsh = ["serializers", "dep:borsh"]
-serializer-musli-descriptive = ["serializers", "dep:musli", "musli/descriptive"]
-serializer-musli-storage = ["serializers", "dep:musli", "musli/storage"]
-serializer-musli-wire = ["serializers", "dep:musli", "musli/wire"]
-serializer-musli-zerocopy = ["serializers", "dep:musli-zerocopy"]
-serializer-postcard-serde = ["serializers", "dep:postcard", "postcard/use-std", "dep:serde"]
-serializer-rkyv = ["serializers"] # note: rkyv is a mandatory dependency for key-sets
-serializer-messagepack = ["serializers", "dep:rmp-serde", "dep:serde"] # Great serde compatibility.
-serializer-zerocopy = ["serializers", "dep:zerocopy", "zerocopy/std"]
+serialize-bincode-native = ["serializers", "dep:bincode"]
+serialize-bincode-serde = ["serializers", "dep:bincode", "bincode/serde", "dep:serde"]
+serialize-bitcode-native = ["serializers", "dep:bitcode"]
+serialize-bitcode-serde = ["serializers", "dep:bitcode", "bitcode/serde", "dep:serde"]
+serialize-borsh = ["serializers", "dep:borsh"]
+serialize-musli-descriptive = ["serializers", "dep:musli", "musli/descriptive"]
+serialize-musli-storage = ["serializers", "dep:musli", "musli/storage"]
+serialize-musli-wire = ["serializers", "dep:musli", "musli/wire"]
+serialize-musli-zerocopy = ["serializers", "dep:musli-zerocopy"]
+serialize-postcard-serde = ["serializers", "dep:postcard", "postcard/use-std", "dep:serde"]
+serialize-rkyv = ["serializers"] # note: no "dep" here, rkyv is a mandatory dependency for key-sets
+serialize-messagepack = ["serializers", "dep:rmp-serde", "dep:serde"] # Great serde compatibility.
+serialize-zerocopy = ["serializers", "dep:zerocopy", "zerocopy/std"]
 
 # COMPRESSORS
 #
@@ -65,7 +65,7 @@ compress-lz4 = ["compressors", "dep:lz4_flex"] # Dictionary support; high-speed,
 compress-zlib = ["compressors", "dep:flate2", "flate2/any_zlib", "flate2/zlib-rs"] # Dictionary support; general purpose, balanced
 compress-zstd = ["compressors", "dep:zstd", "zstd/experimental"] # Dictionary support; archival & read-heavy workloads
 
-# Enable for dictionary support with compatible compressors.
+# Enable dictionary support for compatible compressors.
 compress-dictionaries = []
 
 # ENCRYPTORS
@@ -202,4 +202,6 @@ serde_flow = { version = "1.1", optional = true }
 chrono = { version = "0.4", features = ["serde"] }
 pin-project = "1.1"
 quickcheck = "1.0"
+rand = "0.9"
 zerocopy-derive = "0.8"
+serde_json = "1.0"

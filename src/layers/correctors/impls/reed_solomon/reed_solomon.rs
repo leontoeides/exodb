@@ -25,9 +25,7 @@ pub struct ReedSolomon<V> {
 // Method Implementations
 
 impl<V: Correctable> ReedSolomon<V> {
-    #[inline]
-    #[must_use]
-    pub fn is_protectable(data: &Bytes<'_>) -> bool {
+    #[must_use] pub fn is_protectable(data: &Bytes<'_>) -> bool {
         // Remember the size of the data block before padding, parity data, or the data block
         // length is added:
         let data_len = data.len();
@@ -86,7 +84,7 @@ impl<V: Correctable> ReedSolomon<V> {
                 num_data_shards,      // Number of shards required to encompass the data buffer.
                 total_num_shards,     // Total shards to encompass data and parity blocks.
                 data_and_parity_size, // Total size of data & parity blocks in bytes.
-                total_size            // Total size of data, parity, & metadata blocks in bytes.
+                total_size            // Total size of data, parity, & parameters blocks in bytes.
             ) = Self::buffer_measurements(data_len);
 
             // Initialize the Reed-Solomon engine. This is what does the math to create and
@@ -97,16 +95,16 @@ impl<V: Correctable> ReedSolomon<V> {
                     total_num_shards - num_data_shards
                 )?;
 
-            // Pad the data block, append space for parity data and metadata.
+            // Pad the data block, append space for parity data and parameters.
             //
             // Before:
             // [data buffer]
             //
             // After:
-            // [data buffer][data padding][space for parity shards][space for metadata]
+            // [data buffer][data padding][space for parity shards][space for parameters]
             let mut data = data.to_vec();
             data.reserve(total_size.saturating_sub(data_len));
-            data.resize(data_and_parity_size, 0); // No need to zero-out the metadata block.
+            data.resize(data_and_parity_size, 0); // No need to zero-out the parameters block.
 
             // Builds the structure that will hold the data + parity shards.
             //
@@ -129,14 +127,14 @@ impl<V: Correctable> ReedSolomon<V> {
             // Encode the parity shards using the `reed_solomon_erasure` crate:
             //
             // Before:
-            // [data buffer][data padding][space for parity shards][space for metadata]
+            // [data buffer][data padding][space for parity shards][space for layer parameters]
             //
             // After:
-            // [data buffer][data padding][parity shards][space for metadata]
+            // [data buffer][data padding][parity shards][space for layer parameters]
             reed_solomon.encode(&mut shards)?;
 
             // Instantiate the `Parameters`:
-            let metadata = Parameters::new(
+            let parameters = Parameters::new(
                 shard_size,
                 total_num_shards,
                 num_data_shards,
@@ -144,17 +142,14 @@ impl<V: Correctable> ReedSolomon<V> {
                 Self::compute_checksums(&data, shard_size)
             )?;
 
-            eprintln!("protection scheme: {metadata:#?}");
-
-            // Commit metadata structure to data.
+            // Commit layer parameters structure to data.
             //
             // Before:
-            // [data buffer][data padding][parity shards][space for metadata]
+            // [data buffer][data padding][parity shards][space for layer parameters]
             //
             // After:
-            // [data buffer][data padding][parity shards][metadata]
-            metadata.into_data_buffer(&mut data)?;
-
+            // [data buffer][data padding][parity shards][layer parameters]
+            parameters.into_data_buffer(&mut data)?;
             Ok(data.into())
         }
     }
@@ -163,7 +158,7 @@ impl<V: Correctable> ReedSolomon<V> {
     ///
     /// # Process
     ///
-    /// 1. Parse trailing metadata to determine shard structure
+    /// 1. Parse trailing parameters to determine shard structure
     /// 2. Verify shard integrity using embedded checksums
     /// 3. If all shards are intact, return borrowed slice of original data
     /// 4. If corruption detected, reconstruct missing or damaged shards and return owned data
@@ -178,7 +173,7 @@ impl<V: Correctable> ReedSolomon<V> {
     ///
     /// * If the data is corrupted but not recoverable, or
     /// * If decoding fails due to an internal error.
-    pub fn check_and_recover(data: Bytes<'_>) -> Result<Bytes<'_>, Error> {
+    pub fn check_and_recover(mut data: Bytes<'_>) -> Result<Bytes<'_>, Error> {
         // Remember the size of the data block before padding, parity data, or the data block
         // length is added:
         let data_len = data.len();
@@ -191,17 +186,16 @@ impl<V: Correctable> ReedSolomon<V> {
             tracing::debug!("skipping error correction, data size of {data_len} bytes is too large");
             Ok(data)
         } else {
-            // Parse metadata from the metadata block of bytes at the end of the data buffer:
-            let metadata = Parameters::from_data_buffer(data.as_slice())?;
-
-            eprintln!("checking & recovering with: {metadata:#?}");
+            // Parse layer parameters from the block of bytes at the end of the data buffer:
+            let parameters = Parameters::from_data_buffer(&mut data)?;
 
             // Check integrity of all data and parity shards using CRC-32. This function will return
             // the byte indices of corrupted shards.
-            let corrupted_shards = metadata.check_shards(data.as_slice());
+            let corrupted_shards = parameters.check_shards(data.as_slice());
 
             if corrupted_shards.is_empty() {
                 // Fast path. All shards intact, return borrowed slice:
+                data.truncate(parameters.data_len);
                 Ok(data)
             } else {
                 // Slow path. Reconstruct corrupted shards:
@@ -211,8 +205,8 @@ impl<V: Correctable> ReedSolomon<V> {
                 // reconstruct shards using Galois Fields.
                 let reed_solomon =
                     reed_solomon_erasure::ReedSolomon::<reed_solomon_erasure::galois_8::Field>::new(
-                        metadata.num_data_shards,
-                        metadata.total_num_shards - metadata.num_data_shards
+                        parameters.num_data_shards,
+                        parameters.total_num_shards - parameters.num_data_shards
                     )?;
 
                 // Reconfigures data buffer into shards for reconstruction.
@@ -232,26 +226,26 @@ impl<V: Correctable> ReedSolomon<V> {
                 //      Some(vec![10, 11, 12])  // Parity shard
                 // ]
                 let mut prepared_shards: Vec<Option<Vec<u8>>> =
-                    metadata.prepare_shards(&data, &corrupted_shards);
+                    parameters.prepare_shards(&data, &corrupted_shards);
 
                 // Attempts to reconstruct the corrupted, and now missing, shards:
                 reed_solomon.reconstruct(&mut prepared_shards)?;
 
                 // Data recovery appeared to succeed. We will now reconfigure the data from the
                 // sharded arrangement into a flat buffer of bytes:
-                let recovered_data: Vec<u8> =
-                    metadata.flatten_data_shards(prepared_shards)?;
+                let mut recovered_data: Vec<u8> =
+                    parameters.flatten_data_shards(prepared_shards)?;
 
                 // Mark the data was "recovered" so that it may be later recommitted to the
                 // database:
+                recovered_data.truncate(parameters.data_len);
                 Ok(Bytes::from_recovered_data(recovered_data))
             }
         }
     }
 
     /// Returns the number of parity shards that should be used to protect the value.
-    #[inline]
-    fn num_parity_shards(num_data_shards: usize) -> usize {
+    #[must_use] fn num_parity_shards(num_data_shards: usize) -> usize {
         // Note: `max(1)` ensures that at least on parity shard will be used, regardless of the
         // math.
         match V::LEVEL {
@@ -262,8 +256,8 @@ impl<V: Correctable> ReedSolomon<V> {
         }
     }
 
-    /// Makes several measurements and calculates metadata values based on the data buffer's length,
-    /// in bytes.
+    /// Makes several measurements and calculates later parameters values based on the data buffer's
+    /// length, in bytes.
     ///
     /// These values are returned as a tuple, in order of:
     /// 0. `shard_size` · Size of both data shards and parity shards, in bytes.
@@ -273,9 +267,8 @@ impl<V: Correctable> ReedSolomon<V> {
     ///    shards.
     /// 3. `data_and_parity_size` · Total size of the of both the data block (all data shards) and
     ///    the parity block (all parity shards) in bytes.
-    /// 4. `total_size` · The total size of the data, parity, and metadata blocks in bytes.
-    #[inline]
-    fn buffer_measurements(data_len: usize) -> (usize, usize, usize, usize, usize) {
+    /// 4. `total_size` · The total size of the data, parity, and parameters blocks in bytes.
+    #[must_use] fn buffer_measurements(data_len: usize) -> (usize, usize, usize, usize, usize) {
         // Figure out the size of a shard:
         let shard_size = Self::shard_size(data_len);
 
@@ -299,7 +292,7 @@ impl<V: Correctable> ReedSolomon<V> {
         let data_and_parity_size = total_num_shards * shard_size;
         let total_size = data_and_parity_size + std::mem::size_of::<Parameters>();
 
-        tracing::trace!("total encoded data size with metadata will be {total_size} bytes");
+        tracing::trace!("total encoded data size with parameters will be {total_size} bytes");
 
         (
             shard_size,
@@ -318,17 +311,18 @@ impl<V> ReedSolomon<V> {
     /// buffer length, resulting in 4 to 8 shards per record.
     ///
     /// Recommended shard sizes are clamped between 16 and 65,536 bytes for better cache alignment.
-    #[inline]
-    fn recommended_shard_size(data_len: usize) -> usize {
+    #[must_use] fn recommended_shard_size(data_len: usize) -> usize {
         if data_len == 0 {
             16
-        } else {
+        } else if data_len <= 16_776_960 {
             // Find the highest bit position (essentially log2)
             let log2_size = usize::BITS - 1 - data_len.leading_zeros();
             // 1. Shard size is roughly data_len/4 to data_len/8, rounded to next power of 2
             let shard_log2 = log2_size.saturating_sub(2).max(4); // min 16 (2^4)
             // 2. Subtract 2-3 from log2 to divide by 4-8
             (1 << shard_log2).min(65_536)
+        } else {
+            data_len / 128
         }
     }
 
@@ -342,11 +336,10 @@ impl<V> ReedSolomon<V> {
     /// Additionally, this function ensures that the number of data shards:
     /// * Aren't too few, and
     /// * Don't exceed the Galois field limit, currently `256` shards.
-    #[inline]
-    fn shard_size(data_len: usize) -> usize {
+    #[must_use] fn shard_size(data_len: usize) -> usize {
         // Shard count constraints to be encorced:
         const MIN_SHARDS: usize = 2;
-        const MAX_SHARDS: usize = reed_solomon_erasure::galois_8::Field::ORDER;
+        const MAX_SHARDS: usize = reed_solomon_erasure::galois_8::Field::ORDER - 1;
 
         // Get the recommended shard sized based on the data length:
         let mut shard_size = Self::recommended_shard_size(data_len);
@@ -379,8 +372,7 @@ impl<V> ReedSolomon<V> {
     }
 
     /// Returns the number of data shards required to contain the value.
-    #[inline]
-    const fn num_data_shards(shard_size: usize, data_len: usize) -> usize {
+    #[must_use] const fn num_data_shards(shard_size: usize, data_len: usize) -> usize {
         data_len.div_ceil(shard_size)
     }
 

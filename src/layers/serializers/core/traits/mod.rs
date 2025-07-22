@@ -3,22 +3,22 @@
 
 // Standard Serializer
 
-#[cfg(not(feature = "serializer-rkyv"))]
+#[cfg(not(feature = "serialize-rkyv"))]
 pub mod standard;
 
-#[cfg(not(feature = "serializer-rkyv"))]
+#[cfg(not(feature = "serialize-rkyv"))]
 pub use crate::layers::serializers::core::traits::standard::OrderedWhenSerialized;
 
-#[cfg(not(feature = "serializer-rkyv"))]
+#[cfg(not(feature = "serialize-rkyv"))]
 pub use crate::layers::serializers::core::traits::standard::Serializer;
 
 // Rkyv Serializer
 
-#[cfg(feature = "serializer-rkyv")]
+#[cfg(feature = "serialize-rkyv")]
 pub mod rkyv;
 
-#[cfg(feature = "serializer-rkyv")]
+#[cfg(feature = "serialize-rkyv")]
 pub use crate::layers::serializers::core::traits::rkyv::OrderedWhenSerialized;
 
-#[cfg(feature = "serializer-rkyv")]
+#[cfg(feature = "serialize-rkyv")]
 pub use crate::layers::serializers::core::traits::rkyv::Serializer;

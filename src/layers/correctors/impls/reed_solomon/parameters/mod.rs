@@ -8,7 +8,8 @@ pub use crate::layers::correctors::impls::reed_solomon::parameters::error::Error
 
 // Imports
 
-use crate::layers::core::tail_readers::TailReader;
+use crate::layers::core::Bytes;
+use crate::layers::core::tail_readers::TailReaderBytes;
 
 // -------------------------------------------------------------------------------------------------
 //
@@ -170,8 +171,10 @@ impl Parameters {
     /// * Total number of shards is zero
     /// * Number of data shards is zero or greater than the total number of shards, or
     /// * The number of checksums does not match the total number of shards
-    pub fn from_data_buffer(data: &[u8]) -> Result<Self, Error> {
-        let mut reader = TailReader::from_slice(data);
+    pub fn from_data_buffer(
+        data: &mut Bytes<'_>
+    ) -> Result<Self, Error> {
+        let mut reader = TailReaderBytes::from_bytes(data);
 
         let shard_size: usize = reader.read_u32_le()
             .map_err(|error| Error::InsufficientData { parameter: "shard_size", error })?
@@ -196,11 +199,13 @@ impl Parameters {
         let checksums: Vec<u32> = reader.read_u32_le_vec(total_num_shards)
             .map_err(|error| Error::InsufficientData { parameter: "checksums", error })?;
 
+        reader.close();
+
         Self::new(shard_size, total_num_shards, num_data_shards, data_len, checksums)
     }
 
-    /// Convert
-    #[inline]
+    /// Converts a `usize` integer that's used internally in-memory to a `u32` integer that's used
+    /// for more compact storage.
     fn usize_to_u32(integer: usize, parameter: &'static str) -> Result<u32, Error> {
         u32::try_from(integer).map_err(|_error| Error::InvalidInteger {
             parameter,

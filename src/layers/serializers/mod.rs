@@ -26,10 +26,10 @@ pub mod impls;
 #[cfg(all(
     feature = "serde-safety",
     any(
-        feature = "serializer-bincode-serde",
-        feature = "serializer-bitcode-serde",
-        feature = "serializer-messagepack",
-        feature = "serializer-postcard-serde"
+        feature = "serialize-bincode-serde",
+        feature = "serialize-bitcode-serde",
+        feature = "serialize-messagepack",
+        feature = "serialize-postcard-serde"
     )
 ))]
 pub use crate::layers::serializers::impls::SafeForSerde;

@@ -4,7 +4,7 @@
 
 #[cfg(test)]
 mod round_trip {
-	use crate::layers::core::Direction;
+	use crate::layers::core::{Bytes, Direction};
 	use crate::layers::correctors::impls::reed_solomon::*;
 	use crate::layers::correctors::{Correctable, Level};
 
@@ -42,7 +42,7 @@ mod round_trip {
 	    let protected_data = ReedSolomon::<TestValue>::add_parity((&data).into()).unwrap();
 
 	    // Parse metadata to get shard layout:
-	    let metadata = Parameters::from_data_buffer(&protected_data).unwrap();
+	    let metadata = Parameters::from_data_buffer(&mut protected_data.clone()).unwrap();
 	    let shard_size = metadata.shard_size;
 
 	    // Simulate missing data shard (index 0) by zeroing it:
@@ -142,7 +142,7 @@ mod round_trip {
 	    let protected_data = ReedSolomon::<TestValue>::add_parity((&data).into()).unwrap();
 
 	    // Parse metadata to access shard info
-	    let metadata = Parameters::from_data_buffer(&protected_data).unwrap();
+	    let metadata = Parameters::from_data_buffer(&mut protected_data.clone()).unwrap();
 	    let shard_size = metadata.shard_size;
 
 	    // Corrupt a parity shard (not data shard)
@@ -173,7 +173,7 @@ mod round_trip {
 
 	    let protected_data = ReedSolomon::<HighProtect>::add_parity((&data).into()).unwrap();
 
-	    let metadata = Parameters::from_data_buffer(&protected_data).unwrap();
+	    let metadata = Parameters::from_data_buffer(&mut protected_data.clone()).unwrap();
 	    let shard_size = metadata.shard_size;
 	    let mut protected_data = protected_data.to_vec();
 
@@ -197,8 +197,9 @@ mod round_trip {
 	    // Chop off the metadata
 	    let mut protected_data = protected_data.to_vec();
 	    protected_data.truncate(protected_data.len() - std::mem::size_of::<Parameters>());
+	    let mut protected_data: Bytes = protected_data.into();
 
-	    let result = Parameters::from_data_buffer(&protected_data);
+	    let result = Parameters::from_data_buffer(&mut protected_data);
 	    assert!(matches!(
 	    	result,
 	    	Err(crate::layers::correctors::impls::reed_solomon::parameters::Error::InsufficientData {

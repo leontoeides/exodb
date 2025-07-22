@@ -7,5 +7,8 @@ pub use crate::layers::core::tail_readers::error::Error;
 pub mod tail_reader;
 pub use crate::layers::core::tail_readers::tail_reader::TailReader;
 
+pub mod tail_reader_bytes;
+pub use crate::layers::core::tail_readers::tail_reader_bytes::TailReaderBytes;
+
 pub mod tail_reader_mut;
 pub use crate::layers::core::tail_readers::tail_reader_mut::TailReaderMut;

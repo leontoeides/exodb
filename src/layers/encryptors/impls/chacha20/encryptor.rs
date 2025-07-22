@@ -119,14 +119,14 @@ impl<'b, 'k, V: Encryptable> Encryptor<'b, 'k, V> for ChaCha20<V> {
                 // Borrowed: use out-of-place decryption (allocates only for plaintext)
                 let mut tail_reader = TailReader::from_slice(slice);
                 let parameters = Parameters::from_data_buffer(&mut tail_reader)?;
-                let plain_text = cipher.decrypt(parameters.nonce.as_ref().into(), tail_reader.remaining())?;
+                let plain_text = cipher.decrypt(parameters.nonce.as_ref().into(), tail_reader.close())?;
                 Ok(Bytes::from_parts(metadata, plain_text.into()))
             }
             Cow::Owned(vec) => {
                 // Owned: decrypt in-place (no extra allocation)
                 let mut tail_reader_mut = TailReaderMut::from_vec(vec);
                 let nonce = *Parameters::from_data_buffer_mut(&mut tail_reader_mut)?.nonce;
-                let mut bytes_buf: Vec<u8> = tail_reader_mut.remaining();
+                let mut bytes_buf: Vec<u8> = tail_reader_mut.close();
                 cipher.decrypt_in_place(nonce.as_ref().into(), &[], &mut bytes_buf)?;
                 Ok(Bytes::from_parts(metadata, bytes_buf.into()))
             }

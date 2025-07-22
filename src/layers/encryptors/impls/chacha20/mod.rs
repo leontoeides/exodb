@@ -20,10 +20,11 @@ pub const RING_SHA256_DIGEST: &'static ring::digest::Algorithm = &ring::digest::
 // -------------------------------------------------------------------------------------------------
 //
 /// ChaCha20-Poly1305 is an authenticated encryption with associated data (AEAD) algorithm that
-/// combines the ChaCha20 stream cipher with the Poly1305 message authentication code. It provides
-/// both confidentiality and integrity of data, ensuring that the encrypted data cannot be accessed
-/// or tampered with by unauthorized parties. ChaCha20-Poly1305 was first introduced by Daniel J.
-/// Bernstein in 2008 as a replacement for the RC4 stream cipher.
+/// combines the ChaCha20 stream cipher with the Poly1305 message authentication code.
+///
+/// It provides both confidentiality and integrity of data, ensuring that the encrypted data cannot
+/// be accessed or tampered with by unauthorized parties. ChaCha20-Poly1305 was first introduced by
+/// Daniel J. Bernstein in 2008 as a replacement for the RC4 stream cipher.
 ///
 /// The algorithm has several key features and benefits, including high-speed encryption, with
 /// speeds of up to several gigabits per second. It is designed to be resistant to side-channel
@@ -51,11 +52,11 @@ pub const RING_SHA256_DIGEST: &'static ring::digest::Algorithm = &ring::digest::
 /// permutation model, for the single- and multi-user setting, but it relies on choosing a unique
 /// nonce for every message encrypted.
 ///
-/// Daniel J. Bernstein designed both the ChaCha20 stream cipher and the Poly1305 message
-/// authentication code. ChaCha20 was introduced in 2008, while Poly1305 was published in 2004. The
-/// combination of these two algorithms into ChaCha20-Poly1305 was standardized in RFC 7539 and
+/// Daniel J. Bernstein designed both the `ChaCha20` stream cipher and the Poly1305 message
+/// authentication code. `ChaCha20` was introduced in 2008, while Poly1305 was published in 2004.
+/// The combination of these two algorithms into ChaCha20-Poly1305 was standardized in RFC 7539 and
 /// later updated in RFC 8439.
-#[allow(clippy::too_long_first_doc_paragraph, reason = "crate description")]
+#[allow(clippy::doc_markdown, reason = "it's fine")]
 pub struct ChaCha20<V> {
     /// A marker to tie this `ChaCha20` structure to a specific type `V` without storing any actual
     /// data.

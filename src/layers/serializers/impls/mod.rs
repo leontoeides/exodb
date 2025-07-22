@@ -12,19 +12,19 @@ macro_rules! count_features {
 }
 
 const _SERIALIZER_FEATURE_COUNT: usize = count_features!(
-    "serializer-bincode-native",
-    "serializer-bincode-serde",
-    "serializer-bitcode-native",
-    "serializer-bitcode-serde",
-    "serializer-borsh",
-    "serializer-messagepack",
-    "serializer-musli-descriptive",
-    "serializer-musli-storage",
-    "serializer-musli-wire",
-    "serializer-musli-zerocopy",
-    "serializer-postcard-serde",
-    "serializer-rkyv",
-    "serializer-zerocopy"
+    "serialize-bincode-native",
+    "serialize-bincode-serde",
+    "serialize-bitcode-native",
+    "serialize-bitcode-serde",
+    "serialize-borsh",
+    "serialize-messagepack",
+    "serialize-musli-descriptive",
+    "serialize-musli-storage",
+    "serialize-musli-wire",
+    "serialize-musli-zerocopy",
+    "serialize-postcard-serde",
+    "serialize-rkyv",
+    "serialize-zerocopy"
 );
 
 const _: () = {
@@ -33,19 +33,19 @@ const _: () = {
         // `[dependencies]` section where `atlatl` is declared, 3. ensure only one serializer is enabled.
         !(_SERIALIZER_FEATURE_COUNT > 1),
         "Multiple serializer features enabled! Enable only one of: \
-        `serializer-bincode-native`, \
-        `serializer-bincode-serde`, \
-        `serializer-bitcode-native`, \
-        `serializer-bitcode-serde`, \
-        `serializer-borsh`, \
-        `serializer-messagepack`, \
-        `serializer-musli-descriptive`, \
-        `serializer-musli-storage`, \
-        `serializer-musli-wire`, \
-        `serializer-musli-zerocopy`, \
-        `serializer-postcard-serde`, \
-        `serializer-rkyv`, or \
-        `serializer-zerocopy`",
+        `serialize-bincode-native`, \
+        `serialize-bincode-serde`, \
+        `serialize-bitcode-native`, \
+        `serialize-bitcode-serde`, \
+        `serialize-borsh`, \
+        `serialize-messagepack`, \
+        `serialize-musli-descriptive`, \
+        `serialize-musli-storage`, \
+        `serialize-musli-wire`, \
+        `serialize-musli-zerocopy`, \
+        `serialize-postcard-serde`, \
+        `serialize-rkyv`, or \
+        `serialize-zerocopy`",
     );
 };
 
@@ -53,57 +53,57 @@ const _: () = {
 //
 // Serializer Implementations
 
-#[cfg(feature = "serializer-bincode-native")]
+#[cfg(feature = "serialize-bincode-native")]
 pub mod bincode_native;
 
-#[cfg(feature = "serializer-bincode-serde")]
+#[cfg(feature = "serialize-bincode-serde")]
 pub mod bincode_serde;
 
-#[cfg(feature = "serializer-bitcode-native")]
+#[cfg(feature = "serialize-bitcode-native")]
 pub mod bitcode_native;
 
-#[cfg(feature = "serializer-bitcode-serde")]
+#[cfg(feature = "serialize-bitcode-serde")]
 pub mod bitcode_serde;
 
-#[cfg(feature = "serializer-borsh")]
+#[cfg(feature = "serialize-borsh")]
 pub mod borsh;
 
-#[cfg(feature = "serializer-messagepack")]
+#[cfg(feature = "serialize-messagepack")]
 pub mod rmp_serde;
 
-#[cfg(feature = "serializer-musli-descriptive")]
+#[cfg(feature = "serialize-musli-descriptive")]
 pub mod musli_descriptive;
 
-#[cfg(feature = "serializer-musli-storage")]
+#[cfg(feature = "serialize-musli-storage")]
 pub mod musli_storage;
 
-#[cfg(feature = "serializer-musli-wire")]
+#[cfg(feature = "serialize-musli-wire")]
 pub mod musli_wire;
 
-#[cfg(feature = "serializer-musli-zerocopy")]
+#[cfg(feature = "serialize-musli-zerocopy")]
 pub mod musli_zerocopy;
 
-#[cfg(feature = "serializer-postcard-serde")]
+#[cfg(feature = "serialize-postcard-serde")]
 pub mod postcard_serde;
 
-#[cfg(feature = "serializer-rkyv")]
+#[cfg(feature = "serialize-rkyv")]
 pub mod rkyv;
 
-#[cfg(feature = "serializer-zerocopy")]
+#[cfg(feature = "serialize-zerocopy")]
 pub mod zerocopy;
 
 // -------------------------------------------------------------------------------------------------
 //
 // Serde Safety
 
-#[cfg(all(feature = "serializer-bincode-serde", feature = "serde-safety"))]
+#[cfg(all(feature = "serialize-bincode-serde", feature = "serde-safety"))]
 pub use crate::layers::serializers::impls::bincode_serde::serde_safety::SafeForBincodeSerde as SafeForSerde;
 
-#[cfg(all(feature = "serializer-bitcode-serde", feature = "serde-safety"))]
+#[cfg(all(feature = "serialize-bitcode-serde", feature = "serde-safety"))]
 pub use crate::layers::serializers::impls::bitcode_serde::serde_safety::SafeForBitcodeSerde as SafeForSerde;
 
-#[cfg(all(feature = "serializer-postcard-serde", feature = "serde-safety"))]
+#[cfg(all(feature = "serialize-postcard-serde", feature = "serde-safety"))]
 pub use crate::layers::serializers::impls::postcard_serde::serde_safety::SafeForPostcardSerde as SafeForSerde;
 
-#[cfg(all(feature = "serializer-messagepack", feature = "serde-safety"))]
+#[cfg(all(feature = "serialize-messagepack", feature = "serde-safety"))]
 pub use crate::layers::serializers::impls::rmp_serde::serde_safety::SafeForMessagePack as SafeForSerde;

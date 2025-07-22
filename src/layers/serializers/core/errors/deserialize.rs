@@ -13,7 +13,7 @@ pub enum Error {
     ///
     /// To understand the possible errors this deserializer may produce, please refer to the
     /// official documentation: <https://docs.rs/bincode>
-    #[cfg(any(feature = "serializer-bincode-native", feature = "serializer-bincode-serde"))]
+    #[cfg(any(feature = "serialize-bincode-native", feature = "serialize-bincode-serde"))]
     #[error("bincode deserialization failed")]
     Bincode { #[from] #[source] source: bitcode::error::DecodeError },
 
@@ -21,7 +21,7 @@ pub enum Error {
     ///
     /// To understand the possible errors this serializer may produce, please refer to the official
     /// documentation: <https://docs.rs/bitcode>
-    #[cfg(any(feature = "serializer-bitcode-native", feature = "serializer-bitcode-serde"))]
+    #[cfg(any(feature = "serialize-bitcode-native", feature = "serialize-bitcode-serde"))]
     #[error("bitcode deserialization failed")]
     Bitcode { #[from] #[source] source: bitcode::Error },
 
@@ -29,7 +29,7 @@ pub enum Error {
     ///
     /// To understand the possible errors this serializer may produce, please refer to the official
     /// documentation: <https://docs.rs/borsh>
-    #[cfg(feature = "serializer-borsh")]
+    #[cfg(feature = "serialize-borsh")]
     #[error("borsh deserialization failed")]
     Borsh { #[from] #[source] source: std::io::Error },
 
@@ -37,7 +37,7 @@ pub enum Error {
     ///
     /// To understand the possible errors this serializer may produce, please refer to the official
     /// documentation: <https://docs.rs/rmp-serde>
-    #[cfg(feature = "serializer-messagepack")]
+    #[cfg(feature = "serialize-messagepack")]
     #[error("message-pack deserialization failed")]
     MessagePack { #[from] #[source] source: rmp_serde::decode::Error },
 
@@ -45,7 +45,7 @@ pub enum Error {
     ///
     /// To understand the possible errors this serializer may produce, please refer to the official
     /// documentation: <https://docs.rs/musli>
-    #[cfg(feature = "serializer-musli-descriptive")]
+    #[cfg(feature = "serialize-musli-descriptive")]
     #[error("müsli descriptive-format deserialization failed")]
     MusliDescriptive { #[from] #[source] source: musli::descriptive::Error },
 
@@ -53,7 +53,7 @@ pub enum Error {
     ///
     /// To understand the possible errors this serializer may produce, please refer to the official
     /// documentation: <https://docs.rs/musli>
-    #[cfg(feature = "serializer-musli-storage")]
+    #[cfg(feature = "serialize-musli-storage")]
     #[error("müsli storage-format deserialization failed")]
     MusliStorage { #[from] #[source] source: musli::storage::Error },
 
@@ -61,7 +61,7 @@ pub enum Error {
     ///
     /// To understand the possible errors this serializer may produce, please refer to the official
     /// documentation: <https://docs.rs/musli-zerocopy>
-    #[cfg(feature = "serializer-musli-zerocopy")]
+    #[cfg(feature = "serialize-musli-zerocopy")]
     #[error("müsli zero-copy deserialization failed")]
     MusliStorage { #[from] #[source] source: musli_zerocopy::Error },
 
@@ -69,7 +69,7 @@ pub enum Error {
     ///
     /// To understand the possible errors this serializer may produce, please refer to the official
     /// documentation: <https://docs.rs/musli>
-    #[cfg(feature = "serializer-musli-wire")]
+    #[cfg(feature = "serialize-musli-wire")]
     #[error("müsli wire-format deserialization failed")]
     MusliStorage { #[from] #[source] source: musli::wire::Error },
 
@@ -77,7 +77,7 @@ pub enum Error {
     ///
     /// To understand the possible errors this serializer may produce, please refer to the official
     /// documentation: <https://docs.rs/postcard>
-    #[cfg(feature = "serializer-postcard-serde")]
+    #[cfg(feature = "serialize-postcard-serde")]
     #[error("postcard deserialization failed")]
     Postcard { #[from] #[source] source: postcard::Error },
 
@@ -85,7 +85,7 @@ pub enum Error {
     ///
     /// To understand the possible errors this serializer may produce, please refer to the official
     /// documentation: <https://docs.rs/rkyv>
-    #[cfg(feature = "serializer-rkyv")]
+    #[cfg(feature = "serialize-rkyv")]
     #[error("rkyv deserialization failed")]
     Rkyv { #[from] #[source] source: rkyv::rancor::Error },
 
@@ -93,7 +93,7 @@ pub enum Error {
     ///
     /// To understand the possible errors this serializer may produce, please refer to the official
     /// documentation: <https://docs.rs/zerocopy>
-    #[cfg(feature = "serializer-zerocopy")]
+    #[cfg(feature = "serialize-zerocopy")]
     #[error("source was improperly aligned, was incorrect size, or contained invalid data")]
     Zerocopy,
 }

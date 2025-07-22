@@ -4,6 +4,7 @@
 
 #![allow(clippy::doc_markdown)]
 
+use crate::layers::compressors::impls::RESERVATION_FACTOR;
 use crate::layers::compressors::{Compressible, Compressor, Level, Method};
 use crate::layers::core::Bytes;
 use flate2::Compression;
@@ -99,7 +100,9 @@ impl<'b, V: Compressible> Compressor<'b, V> for Deflate<V> {
         compressed_bytes: Bytes<'b>
     ) -> Result<Bytes<'b>, crate::layers::compressors::DecompressError> {
         let mut decoder = flate2::read::DeflateDecoder::new(compressed_bytes.as_ref());
-        let mut decompressed_bytes = Vec::with_capacity(compressed_bytes.len().saturating_mul(4));
+        let mut decompressed_bytes = Vec::with_capacity(
+            compressed_bytes.len().saturating_mul(RESERVATION_FACTOR)
+        );
         decoder.read_to_end(&mut decompressed_bytes)?;
         Ok(decompressed_bytes.into())
     }

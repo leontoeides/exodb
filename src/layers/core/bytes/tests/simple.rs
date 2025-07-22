@@ -35,10 +35,10 @@ mod tests_comprehensive {
     #[cfg(all(
         feature = "serde-safety",
         any(
-            feature = "serializer-bincode-serde",
-            feature = "serializer-bitcode-serde",
-            feature = "serializer-messagepack",
-            feature = "serializer-postcard-serde"
+            feature = "serialize-bincode-serde",
+            feature = "serialize-bitcode-serde",
+            feature = "serialize-messagepack",
+            feature = "serialize-postcard-serde"
         )
     ))]
     unsafe impl crate::layers::serializers::SafeForSerde for TestValue {}
@@ -46,10 +46,10 @@ mod tests_comprehensive {
     #[cfg(all(
         feature = "serde-safety",
         any(
-            feature = "serializer-bincode-serde",
-            feature = "serializer-bitcode-serde",
-            feature = "serializer-messagepack",
-            feature = "serializer-postcard-serde"
+            feature = "serialize-bincode-serde",
+            feature = "serialize-bitcode-serde",
+            feature = "serialize-messagepack",
+            feature = "serialize-postcard-serde"
         )
     ))]
     unsafe impl crate::layers::serializers::SafeForSerde for ComplexData {}
@@ -57,10 +57,10 @@ mod tests_comprehensive {
     #[cfg(all(
         feature = "serde-safety",
         any(
-            feature = "serializer-bincode-serde",
-            feature = "serializer-bitcode-serde",
-            feature = "serializer-messagepack",
-            feature = "serializer-postcard-serde"
+            feature = "serialize-bincode-serde",
+            feature = "serialize-bitcode-serde",
+            feature = "serialize-messagepack",
+            feature = "serialize-postcard-serde"
         )
     ))]
     unsafe impl crate::layers::serializers::SafeForSerde for NestedData {}
