@@ -1,4 +1,4 @@
-//! Support for [Sebastian Thiel](https://github.com/Byron) and [Josh
+//! Zlib compression using [Sebastian Thiel](https://github.com/Byron) and [Josh
 //! Triplett](https://github.com/joshtriplett)'s [flate2](https://crates.io/crates/flate2)
 //! crate's zlib implementation.
 

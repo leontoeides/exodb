@@ -1,4 +1,4 @@
-//! Support for [Pascal Seitz](https://github.com/PSeitz)'s
+//! LZ4 compression using [Pascal Seitz](https://github.com/PSeitz)'s
 //! [lz4_flex](https://crates.io/crates/lz4_flex) crate.
 
 #[cfg(feature = "compress-dictionaries")]

@@ -1,5 +1,6 @@
-//! Support for [Servo](https://github.com/servo), [Simon Sapin](https://github.com/SimonSapin), and
-//! [Daniel Horn](https://github.com/danielrh)'s [brotli](https://crates.io/crates/brotli) crate.
+//! Brotli compression using [Servo](https://github.com/servo), [Simon
+//! Sapin](https://github.com/SimonSapin), and [Daniel Horn](https://github.com/danielrh)'s
+//! [brotli](https://crates.io/crates/brotli) crate.
 
 use crate::layers::compressors::impls::{BUFFER_LEN, RESERVATION_FACTOR};
 use crate::layers::compressors::{Compressible, Compressor, Level, Method};

@@ -1,5 +1,5 @@
-//! Support for [Brian Smith](https://github.com/briansmith)'s [ring](https://crates.io/crates/ring)
-//! crate.
+//! SHA-256 Key Derivation Function (KDF) using [Brian Smith](https://github.com/briansmith)'s
+//! [ring](https://crates.io/crates/ring) crate.
 
 use crate::layers::encryptors::{kdf::Key, KEY_SIZE};
 use std::borrow::Cow;

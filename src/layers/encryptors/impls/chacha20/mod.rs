@@ -1,4 +1,4 @@
-//! Support for [Artyom Pavlov](https://github.com/newpavlov)'s
+//! ChaCha20-Poly1305 encryption using [Artyom Pavlov](https://github.com/newpavlov)'s
 //! [chacha20poly1305](https://crates.io/crates/chacha20poly1305) crate.
 
 mod encryptor;

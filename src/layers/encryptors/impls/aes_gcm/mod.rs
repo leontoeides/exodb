@@ -1,4 +1,4 @@
-//! Support for [Tony Arcieri](https://github.com/tarcieri)'s
+//! AES-GCM encryption using [Tony Arcieri](https://github.com/tarcieri)'s
 //! [aes-gcm](https://crates.io/crates/aes-gcm) crate.
 
 mod encryptor;

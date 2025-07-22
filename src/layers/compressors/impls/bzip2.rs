@@ -1,4 +1,4 @@
-//! Support for [Alex Crichton](https://github.com/alexcrichton),
+//! Bzip2 compression using [Alex Crichton](https://github.com/alexcrichton),
 //! [bjorn3](https://github.com/bjorn3), and [Folkert de Vries](https://github.com/folkertdev)'s
 //! [bzip2](https://crates.io/crates/bzip2) crate.
 

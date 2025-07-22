@@ -1,5 +1,5 @@
-//! Support for [Alexandre Bury](https://github.com/gyscos)'s [zstd](https://crates.io/crates/zstd)
-//! crate.
+//! Zstandard compression using [Alexandre Bury](https://github.com/gyscos)'s
+//! [zstd](https://crates.io/crates/zstd) crate.
 
 #[cfg(feature = "compress-dictionaries")]
 mod dictionary;
@@ -9,18 +9,19 @@ mod standard;
 
 // -------------------------------------------------------------------------------------------------
 //
-/// GZIP compression is a widely used technique based on the DEFLATE algorithm, which combines the
-/// LZ77 and Huffman coding algorithms to reduce file size without losing any data
+/// Zstandard, commonly referred to as ZSTD, is a fast, lossless data compression algorithm that
+/// offers a compelling balance between compression ratio and speed. It was developed by Yann Collet
+/// at Facebook, and it has gained widespread adoption across the tech industry due to its high
+/// compression ratios, fast decompression speeds, and scalability. ZSTD is designed to provide a
+/// better balance of compression speed and compression ratio compared to other popular algorithms
+/// like gzip and bzip2.
 ///
-/// It is often used for lossless compression of files, particularly for web content such as HTML,
-/// CSS, and JavaScript. This method is popular because it provides a good balance between
-/// compression ratio and speed, making it suitable for a variety of applications.
-///
-/// The GZIP algorithm works by identifying repeated sequences of bytes in the data and replacing
-/// them with shorter representations. These shortened sequences are then assigned a variable number
-/// of bits based on their frequency of occurrence. More frequent sequences receive fewer bits,
-/// while rarer ones are assigned more bits. This process results in a smaller compressed file than
-/// the original file.
+/// One of the key benefits of ZSTD is its ability to offer high compression ratios while
+/// maintaining fast decompression speeds, making it suitable for real-time applications where quick
+/// data processing is crucial. Additionally, ZSTD supports a wide range of compression levels,
+/// from -22 to 22, allowing users to choose the optimal trade-off between compression speed and
+/// ratio. This flexibility makes it versatile for various applications, from real-time data
+/// compression in network communications to efficient storage of large datasets.
 pub struct Zstd<V> {
     /// A marker to tie this `Zstd` compressor to a specific type `V` without storing any actual
     /// data.

@@ -1,4 +1,4 @@
-//! Support for [Jack O'Connor](https://github.com/oconnor663)'s
+//! BLAKE3 Key Derivation Function (KDF) using [Jack O'Connor](https://github.com/oconnor663)'s
 //! [blake3](https://crates.io/crates/blake3) crate.
 
 use crate::layers::encryptors::{kdf::Key, KEY_SIZE};
