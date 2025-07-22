@@ -230,61 +230,6 @@ mod quickcheck_tests {
         }
     }
 
-    #[test]
-    fn quickcheck_performance_baseline() {
-        use std::time::Instant;
-
-        let start = Instant::now();
-        let count = 100_000;
-
-        for i in 0..count {
-            let data = QuickTestData {
-                id: i,
-                name: format!("test{i}"),
-                tags: vec!["tag".to_string()],
-                metadata: HashMap::new(),
-                binary_data: vec![1, 2, 3],
-                flag: true,
-            };
-
-            // Just test serialization without layers
-            let _serialized = serde_json::to_vec(&data).unwrap();
-        }
-
-        eprintln!("100k JSON serializations took: {:?}", start.elapsed());
-    }
-
-    #[test]
-    fn quickcheck_performance() {
-        use std::time::Instant;
-
-        let key = test_key();
-        let start = Instant::now();
-        let count = 100_000;
-
-        for i in 0..count {
-            let data = QuickTestData {
-                id: i,
-                name: format!("test{i}"),
-                tags: vec!["tag".to_string()],
-                metadata: HashMap::new(),
-                binary_data: vec![1, 2, 3],
-                flag: true,
-            };
-
-            // Just test serialization without layers
-            let _bytes = match Bytes::apply_write_layers(&data, (*key).into(), None, None) {
-                Ok(value) => value,
-                Err(e) => {
-                    eprintln!("Layer failure: {e:?}");
-                    panic!("Early exit on failure"); // return false;
-                }
-            };
-        }
-
-        eprintln!("100k serialization+compression+encryption+ECC protections took: {:?}", start.elapsed());
-    }
-
     // Regular QuickCheck tests
     #[test]
     fn quickcheck_round_trip_preserves_data() {

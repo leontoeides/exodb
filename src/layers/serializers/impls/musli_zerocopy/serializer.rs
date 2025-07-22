@@ -17,7 +17,7 @@ where T: Clone + musli_zerocopy::ZeroCopy {
     ///
     /// # Generics & Lifetimes
     ///
-    /// * `V` generic represents the user's value type, for example: `User`, `String`, etc.
+    /// * `T` generic represents the user's value type, for example: `User`, `String`, etc.
     /// * `b` lifetime represents bytes potentially being borrowed from the host application.
     #[inline]
     fn serialize(
@@ -35,7 +35,7 @@ where T: Clone + musli_zerocopy::ZeroCopy {
     ///
     /// # Generics & Lifetimes
     ///
-    /// * `V` generic represents the user's value type, for example: `User`, `String`, etc.
+    /// * `T` generic represents the user's value type, for example: `User`, `String`, etc.
     /// * `b` lifetime represents bytes potentially being borrowed from the host application.
     #[inline]
     fn serialize_ref(
@@ -54,7 +54,7 @@ where T: Clone + musli_zerocopy::ZeroCopy {
     ///
     /// # Generics & Lifetimes
     ///
-    /// * `V` generic represents the user's value type, for example: `User`, `String`, etc.
+    /// * `T` generic represents the user's value type, for example: `User`, `String`, etc.
     /// * `b` lifetime represents bytes potentially being borrowed from the `redb` database.
     #[inline]
     fn deserialize(

@@ -1,32 +1,65 @@
-//! Trait implementations that tell the system how to serialize & deserialize types.
+//! Trait implementation that tells the system how to serialize & deserialize types.
 
-use crate::layers::{serializers::{Error, Method}, ValueBuf};
+use crate::layers::core::{Bytes, Value};
+use crate::layers::serializers::{DeserializeError, Method, SerializeError};
 
 // -------------------------------------------------------------------------------------------------
 
 #[cfg(feature = "serde-safety")]
 impl<'b, T> crate::layers::Serializer<'b, T> for T
-where T: serde::de::DeserializeOwned + serde::Serialize + crate::layers::serializers::SafeForBitcodeSerde {
-    /// Serialize a value into its binary representation.
+where T: serde::de::DeserializeOwned + serde::Serialize + crate::layers::serializers::impls::bitcode_serde::serde_safety::SafeForBitcodeSerde {
+    /// Serializes an owned value into its binary representation.
     ///
     /// # Errors
     ///
     /// * To understand the possible errors this serializer may produce, please refer to the
     ///   official documentation: <https://docs.rs/bitcode>
+    ///
+    /// # Generics & Lifetimes
+    ///
+    /// * `T` generic represents the user's value type, for example: `User`, `String`, etc.
+    /// * `b` lifetime represents bytes potentially being borrowed from the host application.
     #[inline]
-    fn serialize(&self) -> Result<ValueBuf<'b>, Error> {
+    fn serialize(
+        self
+    ) -> Result<Bytes<'b>, SerializeError> {
+        Ok(bitcode::serialize(&self)?.into())
+    }
+
+    /// Serializes a borrowed value into its binary representation.
+    ///
+    /// # Errors
+    ///
+    /// * To understand the possible errors this serializer may produce, please refer to the
+    ///   official documentation: <https://docs.rs/bitcode>
+    ///
+    /// # Generics & Lifetimes
+    ///
+    /// * `T` generic represents the user's value type, for example: `User`, `String`, etc.
+    /// * `b` lifetime represents bytes potentially being borrowed from the host application.
+    #[inline]
+    fn serialize_ref(
+        &'b self
+    ) -> Result<Bytes<'b>, SerializeError> {
         Ok(bitcode::serialize(self)?.into())
     }
 
-    /// Deserialize a value into its binary representation.
+    /// Deserializes a series of bytes into a `T` native value.
     ///
     /// # Errors
     ///
     /// * To understand the possible errors this deserializer may produce, please refer to the
     ///   official documentation: <https://docs.rs/bitcode>
+    ///
+    /// # Generics & Lifetimes
+    ///
+    /// * `T` generic represents the user's value type, for example: `User`, `String`, etc.
+    /// * `b` lifetime represents bytes potentially being borrowed from the `redb` database.
     #[inline]
-    fn deserialize(serialized_bytes: ValueBuf<'b>) -> Result<T, Error> {
-        Ok(bitcode::deserialize(&serialized_bytes)?)
+    fn deserialize(
+        serialized_bytes: Bytes<'b>
+    ) -> Result<Value<'b, T>, DeserializeError> {
+        Ok(bitcode::deserialize::<T>(&serialized_bytes)?.into())
     }
 
     /// Returns the serialization method that the current `Serializer` trait implements.
@@ -41,28 +74,60 @@ where T: serde::de::DeserializeOwned + serde::Serialize + crate::layers::seriali
 }
 
 #[cfg(not(feature = "serde-safety"))]
-impl<T> crate::layers::Serializer<T> for T
+impl<'b, T> crate::layers::Serializer<'b, T> for T
 where T: serde::de::DeserializeOwned + serde::Serialize {
-    /// Serialize a value into its binary representation.
+    /// Serializes an owned value into its binary representation.
     ///
     /// # Errors
     ///
     /// * To understand the possible errors this serializer may produce, please refer to the
     ///   official documentation: <https://docs.rs/bitcode>
+    ///
+    /// # Generics & Lifetimes
+    ///
+    /// * `T` generic represents the user's value type, for example: `User`, `String`, etc.
+    /// * `b` lifetime represents bytes potentially being borrowed from the host application.
     #[inline]
-    fn serialize(&self) -> Result<ValueBuf<'b>, Error> {
+    fn serialize(
+        self
+    ) -> Result<Bytes<'b>, SerializeError> {
+        Ok(bitcode::serialize(&self)?.into())
+    }
+
+    /// Serializes a borrowed value into its binary representation.
+    ///
+    /// # Errors
+    ///
+    /// * To understand the possible errors this serializer may produce, please refer to the
+    ///   official documentation: <https://docs.rs/bitcode>
+    ///
+    /// # Generics & Lifetimes
+    ///
+    /// * `T` generic represents the user's value type, for example: `User`, `String`, etc.
+    /// * `b` lifetime represents bytes potentially being borrowed from the host application.
+    #[inline]
+    fn serialize_ref(
+        &'b self
+    ) -> Result<Bytes<'b>, SerializeError> {
         Ok(bitcode::serialize(self)?.into())
     }
 
-    /// Deserialize a value into its binary representation.
+    /// Deserializes a series of bytes into a `T` native value.
     ///
     /// # Errors
     ///
     /// * To understand the possible errors this deserializer may produce, please refer to the
     ///   official documentation: <https://docs.rs/bitcode>
+    ///
+    /// # Generics & Lifetimes
+    ///
+    /// * `T` generic represents the user's value type, for example: `User`, `String`, etc.
+    /// * `b` lifetime represents bytes potentially being borrowed from the `redb` database.
     #[inline]
-    fn deserialize(serialized_bytes: ValueBuf<'b>) -> Result<T, Error> {
-        Ok(bitcode::deserialize(&serialized_bytes)?)
+    fn deserialize(
+        serialized_bytes: Bytes<'b>
+    ) -> Result<Value<'b, T>, DeserializeError> {
+        Ok(bitcode::deserialize::<T>(&serialized_bytes)?.into())
     }
 
     /// Returns the serialization method that the current `Serializer` trait implements.

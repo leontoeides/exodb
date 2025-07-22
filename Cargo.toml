@@ -37,8 +37,8 @@ default = [
 # project's Cargo.toml:
 serialize-bincode-native = ["serializers", "dep:bincode"]
 serialize-bincode-serde = ["serializers", "dep:bincode", "bincode/serde", "dep:serde"]
-serialize-bitcode-native = ["serializers", "dep:bitcode"]
-serialize-bitcode-serde = ["serializers", "dep:bitcode", "bitcode/serde", "dep:serde"]
+serialize-bitcode-native = ["serializers", "dep:bitcode"] # Experimental
+serialize-bitcode-serde = ["serializers", "dep:bitcode", "bitcode/serde", "dep:serde"] # Experimental
 serialize-borsh = ["serializers", "dep:borsh"]
 serialize-musli-descriptive = ["serializers", "dep:musli", "musli/descriptive"]
 serialize-musli-storage = ["serializers", "dep:musli", "musli/storage"]

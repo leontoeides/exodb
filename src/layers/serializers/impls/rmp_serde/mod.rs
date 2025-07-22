@@ -1,4 +1,6 @@
-//! Support for [Kornel Lesiński](https://github.com/kornelski) and
+#![allow(clippy::doc_markdown)]
+
+//! MessagePack serialization using [Kornel Lesiński](https://github.com/kornelski) and
 //! [Evgeny Safronov](https://github.com/3Hren)'s
 //! [rmp-serde](https://crates.io/crates/rmp-serde) crate.
 

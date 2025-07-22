@@ -30,7 +30,7 @@
 /// 2. Opt-in manually: after validating, implement the marker:
 ///
 ///    ```rust
-///    # use atlatl::codecs::SafeForBitcodeSerde;
+///    # use atlatl::layers::serializers::impls::bitcode_serde::serde_safety::SafeForBitcodeSerde;
 ///    # struct MyType {}
 ///    unsafe impl SafeForBitcodeSerde for MyType {}
 ///    ```
@@ -52,7 +52,7 @@
 /// If you've safely implemented:
 ///
 /// ```rust
-/// # use atlatl::codecs::SafeForBitcodeSerde;
+/// # use atlatl::layers::serializers::impls::bitcode_serde::serde_safety::SafeForBitcodeSerde;
 /// # struct ThatThingYouUseEverywhere {}
 /// unsafe impl SafeForBitcodeSerde for ThatThingYouUseEverywhere {}
 /// ```
@@ -68,7 +68,7 @@
 ///
 /// Submit a PR adding your safe impl to:
 ///
-/// * `SafeForBincodeSerde`
+/// * `SafeForBitcodeSerde`
 /// * `SafeForMessagePack`
 /// * `SafeForPostcardSerde`
 ///

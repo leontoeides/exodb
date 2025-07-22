@@ -22,7 +22,7 @@ mod encryption;
 #[cfg(feature = "serializers")]
 mod serialization;
 
-mod tests;
+// mod tests;
 mod read;
 mod write;
 

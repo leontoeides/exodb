@@ -15,7 +15,7 @@ pub enum Error {
     /// official documentation: <https://docs.rs/bincode>
     #[cfg(any(feature = "serialize-bincode-native", feature = "serialize-bincode-serde"))]
     #[error("bincode deserialization failed")]
-    Bincode { #[from] #[source] source: bitcode::error::DecodeError },
+    Bincode { #[from] #[source] source: bincode::error::DecodeError },
 
     /// Error returned from the [bitcode](https://crates.io/crates/bitcode) crate.
     ///

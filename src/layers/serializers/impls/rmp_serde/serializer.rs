@@ -8,7 +8,11 @@ use std::borrow::Cow;
 
 #[cfg(feature = "serde-safety")]
 impl<'b, T> crate::layers::Serializer<'b, T> for T
-where T: serde::de::DeserializeOwned + serde::Serialize + crate::layers::serializers::impls::rmp_serde::SafeForSerde {
+where T:
+    serde::de::DeserializeOwned +
+    serde::Serialize +
+    crate::layers::serializers::impls::rmp_serde::SafeForSerde
+{
     /// Serializes an owned value into its binary representation.
     ///
     /// # Errors
@@ -18,7 +22,7 @@ where T: serde::de::DeserializeOwned + serde::Serialize + crate::layers::seriali
     ///
     /// # Generics & Lifetimes
     ///
-    /// * `V` generic represents the user's value type, for example: `User`, `String`, etc.
+    /// * `T` generic represents the user's value type, for example: `User`, `String`, etc.
     /// * `b` lifetime represents bytes potentially being borrowed from the host application.
     #[inline]
     fn serialize(
@@ -36,7 +40,7 @@ where T: serde::de::DeserializeOwned + serde::Serialize + crate::layers::seriali
     ///
     /// # Generics & Lifetimes
     ///
-    /// * `V` generic represents the user's value type, for example: `User`, `String`, etc.
+    /// * `T` generic represents the user's value type, for example: `User`, `String`, etc.
     /// * `b` lifetime represents bytes potentially being borrowed from the host application.
     #[inline]
     fn serialize_ref(
@@ -54,7 +58,7 @@ where T: serde::de::DeserializeOwned + serde::Serialize + crate::layers::seriali
     ///
     /// # Generics & Lifetimes
     ///
-    /// * `V` generic represents the user's value type, for example: `User`, `String`, etc.
+    /// * `T` generic represents the user's value type, for example: `User`, `String`, etc.
     /// * `b` lifetime represents bytes potentially being borrowed from the `redb` database.
     #[inline]
     fn deserialize(
@@ -91,7 +95,7 @@ where T: serde::de::DeserializeOwned + serde::Serialize {
     ///
     /// # Generics & Lifetimes
     ///
-    /// * `V` generic represents the user's value type, for example: `User`, `String`, etc.
+    /// * `T` generic represents the user's value type, for example: `User`, `String`, etc.
     /// * `b` lifetime represents bytes potentially being borrowed from the host application.
     #[inline]
     fn serialize(
@@ -109,7 +113,7 @@ where T: serde::de::DeserializeOwned + serde::Serialize {
     ///
     /// # Generics & Lifetimes
     ///
-    /// * `V` generic represents the user's value type, for example: `User`, `String`, etc.
+    /// * `T` generic represents the user's value type, for example: `User`, `String`, etc.
     /// * `b` lifetime represents bytes potentially being borrowed from the host application.
     #[inline]
     fn serialize_ref(
@@ -127,7 +131,7 @@ where T: serde::de::DeserializeOwned + serde::Serialize {
     ///
     /// # Generics & Lifetimes
     ///
-    /// * `V` generic represents the user's value type, for example: `User`, `String`, etc.
+    /// * `T` generic represents the user's value type, for example: `User`, `String`, etc.
     /// * `b` lifetime represents bytes potentially being borrowed from the `redb` database.
     #[inline]
     fn deserialize(

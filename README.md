@@ -8,8 +8,8 @@ Atlatl is a performance-conscious wrapper for redb with ergonomic access to type
 # Special Thanks
 
 A special thanks to:
-* [Christopher Berner](https://github.com/cberner) and team for the [redb](https://crates.io/crates/redb) crate.
-* [David Koloski](https://github.com/djkoloski) and team for the [rkyv](https://crates.io/crates/rkyv) crate.
+1. [Christopher Berner](https://github.com/cberner) and team for the [redb](https://crates.io/crates/redb) crate.
+2. [David Koloski](https://github.com/djkoloski) and team for the [rkyv](https://crates.io/crates/rkyv) crate.
 
 # The Layer Pipeline
 
@@ -35,7 +35,11 @@ Atlatl hosts a smörgåsbord of serialization options.
 
 ### Zero-copy Deserialization
 
-Zero-copy deserialization “from the disk to the wire” is possible using the `rkyv`, `musli-zerocopy`, and `zerocopy` serializers, as long as the rest of layer pipeline isn't used. This means compression, encryption, and error correction must be disabled.
+Zero-copy deserialization “from the disk to the wire” is possible using the `rkyv`, `musli-zerocopy`, and `zerocopy` serializers, as long as the rest of layer pipeline isn't used. This means compression, encryption, and error correction must be disabled for your setup to be truly zero-copy.
+
+### Warnings
+
+* If you change your `Cargo.toml` serialization features, you will lose access to any existing databases that used the previous serialization method.
 
 ## 2. Compression
 
@@ -60,7 +64,8 @@ When the `compress-dictionaries` feature is enabled, the `lz4`, `zlib`, `zstd` c
 Treat your compression dictionaries like encryption keys:
 
 * If a compression dictionary becomes lost or corrupted, all data will be permanently lost.
-* The may contain sensitive information or enough information to decrypt your data.
+* Dictionaries may contain sensitive information or sufficient information for decryption your data to be possible.
+* If you change your `Cargo.toml` compression features, you will lose access to any existing databases that used the previous compression method.
 
 ## 3. Encryption
 
@@ -84,6 +89,7 @@ Keys are provided using key-rings which can be chained together and used to decr
 
 * If your keys become lost or corrupted, all data will be permanently lost.
 * If your keys are leaked, or become public knowledge, your data may be compromised.
+* If you change your `Cargo.toml` encryption features, you will lose access to any existing databases that used the previous encryption method.
 
 ## 4. Error Correction
 
